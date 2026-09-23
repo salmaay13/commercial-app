@@ -420,7 +420,7 @@ a.product-cell:hover { color: var(--blue); }
 .login__brand {
   position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 28px;
   padding: 40px 48px; color: #fff;
-  background-image: url('C:\Users\Lenovo\Downloads\commercial-order-app_design\frontend\public\panel_photo_hq.png');
+background-image: url('/panel_photo_hq.png');
   background-size: cover;
   background-position: center;
 }
