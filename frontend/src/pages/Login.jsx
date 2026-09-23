@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, ShieldCheck, MousePointerClick, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button, Input, Logo } from '../components/ui';
+import LoginIllustration from '../components/LoginIllustration';
 
 const PERKS = [
   { icon: Zap, title: 'Rapide', text: 'Commande en quelques clics' },
@@ -43,6 +44,7 @@ export default function Login() {
           <h1>Votre espace commercial</h1>
           <p>Commandez facilement, gérez vos clients et accédez à vos tarifs personnalisés.</p>
         </div>
+        <LoginIllustration />
         <ul className="login__perks">
           {PERKS.map(({ icon: Icon, title, text }) => (
             <li key={title}><Icon size={20} /><strong>{title}</strong><span>{text}</span></li>
