@@ -1527,9 +1527,20 @@ export function computeTotals(lines) {
 }
 
 export function initials(name = '') {
-  const words = name.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/).filter(Boolean);
+  const safeName = String(name ?? '');
+
+  const words = safeName
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
   if (!words.length) return '?';
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
