@@ -1,0 +1,3027 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+backend/
+  api/
+    index.js
+  dev/
+    mock-odoo.js
+  src/
+    middleware/
+      auth.js
+    odoo/
+      client.js
+    routes/
+      auth.js
+      clients.js
+      orders.js
+    services/
+      pricing.js
+    app.js
+    config.js
+    server.js
+  package.json
+  vercel.json
+frontend/
+  public/
+    favicon.svg
+  src/
+    components/
+      Cart.jsx
+      ClientCard.jsx
+      Header.jsx
+      Layout.jsx
+      LoginIllustration.jsx
+      OrderSummary.jsx
+      PageHeader.jsx
+      ProductCard.jsx
+      ProductTable.jsx
+      Sidebar.jsx
+      StockBadge.jsx
+      ui.jsx
+    context/
+      AuthContext.jsx
+      CartContext.jsx
+      ToastContext.jsx
+    lib/
+      api.js
+      format.js
+      useAsync.js
+      usePricedLines.js
+    pages/
+      ClientProducts.jsx
+      Clients.jsx
+      Confirmation.jsx
+      Dashboard.jsx
+      Login.jsx
+      NotFound.jsx
+      Orders.jsx
+      OrderSuccess.jsx
+      ProductDetail.jsx
+      ProductsEntry.jsx
+      Settings.jsx
+    styles/
+      index.css
+    App.jsx
+    main.jsx
+  index.html
+  package.json
+  vite.config.js
+.gitignore
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="backend/api/index.js">
+import app from '../src/app.js';
+export default app;
+</file>
+
+<file path="backend/dev/mock-odoo.js">
+/**
+ * Faux serveur Odoo (JSON-RPC) — UNIQUEMENT pour tester l'application sans accès à un vrai Odoo.
+ * Lancement : npm run mock:odoo  (port 8069)
+ * Puis dans backend/.env : ODOO_URL=http://localhost:8069, ODOO_DB=demo, ODOO_USERNAME=api, ODOO_PASSWORD=api
+ * Connexion dans l'app : salma@demo.ma / demo
+ * Ne jamais utiliser en production : les données sont en mémoire et perdues à l'arrêt.
+ */
+import http from 'node:http';
+
+const users = [
+  { id: 1, login: 'api', password: 'api', name: 'API', email: '' },
+  { id: 2, login: 'salma@demo.ma', password: 'demo', name: 'Salma Ayouch', email: 'salma@demo.ma' },
+];
+const m2o = (rows, id) => { const r = rows.find((x) => x.id === id); return r ? [r.id, r.name] : false; };
+
+const pricelists = [{ id: 1, name: 'Tarif public' }, { id: 2, name: 'Tarif CHR' }];
+const categories = [
+  { id: 1, name: 'Tous', parent_path: '1/' },
+  { id: 2, name: 'Tous / Café & Thé', parent_path: '1/2/' },
+  { id: 3, name: 'Tous / Épicerie', parent_path: '1/3/' },
+  { id: 4, name: 'Tous / Biscuiterie', parent_path: '1/4/' },
+];
+const db = {
+  'res.users': users,
+  'res.partner': [
+    ['2 VIEWS COFFEE', 'Kenitra', 2], ['A.E.I PRESTIGIA', 'Rabat', 1], ['A2 SNACK & MORE', 'Rabat', 2],
+    ['AB GROUP', 'Marrakech', 1], ['ABDERAHMAN EL KHADRI', 'Meknès', 1], ['ABLAZ', 'Marrakech', 2],
+    ['ADAMS', 'Casablanca', 1], ['ADAMS BAKERY', 'Rabat', 2],
+  ].map(([name, city, pl], i) => ({
+    id: 10 + i, name, city, street: '', email: '', phone: '', mobile: '', active: true, customer_rank: 1,
+    is_company: true, user_id: 2, property_product_pricelist: m2o(pricelists, pl),
+  })),
+  'product.category': categories,
+  'product.product': [
+    ['Café Arabica 1kg', 'CA-001', 140, 90, 2, 84], ['Thé Vert 500g', 'TV-002', 85, 50, 2, 56],
+    ['Sucre 1kg', 'SU-003', 18, 12, 3, 120], ['Lait en poudre 400g', 'LP-004', 45, 30, 3, 78],
+    ['Chocolat en poudre 1kg', 'CH-005', 65, 40, 3, 34], ['Biscuits Premium', 'BI-006', 22, 14, 4, 90],
+  ].map(([name, code, lst, cost, cat, qty], i) => ({
+    id: 100 + i, name, default_code: code, lst_price: lst, standard_price: cost, categ_id: m2o(categories, cat),
+    product_tmpl_id: [200 + i, name], uom_id: [1, 'Unité(s)'], description_sale: '', image_128: false,
+    qty_available: qty, sale_ok: true, active: true,
+  })),
+  'product.pricelist': pricelists,
+  'product.pricelist.item': [
+    { id: 1, pricelist_id: [2, 'Tarif CHR'], applied_on: '0_product_variant', product_id: [100, 'Café Arabica 1kg'], product_tmpl_id: false, categ_id: false, min_quantity: 0, compute_price: 'fixed', fixed_price: 130, base: 'list_price' },
+    { id: 2, pricelist_id: [2, 'Tarif CHR'], applied_on: '0_product_variant', product_id: [100, 'Café Arabica 1kg'], product_tmpl_id: false, categ_id: false, min_quantity: 10, compute_price: 'fixed', fixed_price: 122, base: 'list_price' },
+    { id: 3, pricelist_id: [2, 'Tarif CHR'], applied_on: '2_product_category', product_id: false, product_tmpl_id: false, categ_id: [3, 'Tous / Épicerie'], min_quantity: 0, compute_price: 'percentage', percent_price: 5, base: 'list_price' },
+  ],
+  'account.tax': [{ id: 1, name: 'TVA 20%', type_tax_use: 'sale', amount_type: 'percent', amount: 20 }],
+  'sale.order': [],
+  'sale.order.line': [],
+};
+const fieldsOf = {
+  'res.partner': ['name', 'city', 'street', 'email', 'phone', 'mobile', 'customer_rank', 'is_company', 'user_id', 'property_product_pricelist', 'active'],
+  'product.product': ['name', 'default_code', 'lst_price', 'standard_price', 'categ_id', 'product_tmpl_id', 'uom_id', 'description_sale', 'image_128', 'qty_available', 'sale_ok', 'active'],
+  'product.pricelist.item': ['applied_on', 'product_id', 'product_tmpl_id', 'categ_id', 'min_quantity', 'compute_price', 'fixed_price', 'percent_price', 'price_discount', 'price_surcharge', 'price_round', 'price_min_margin', 'price_max_margin', 'base', 'base_pricelist_id', 'date_start', 'date_end'],
+  'sale.order': ['name', 'partner_id', 'user_id', 'date_order', 'amount_untaxed', 'amount_tax', 'amount_total', 'state', 'pricelist_id', 'order_line'],
+  'sale.order.line': ['product_id', 'product_uom_qty', 'price_unit', 'tax_id'],
+};
+
+const val = (v) => (Array.isArray(v) ? v[0] : v);
+function match(rec, domain) {
+  return domain.every((c) => {
+    if (!Array.isArray(c)) return true;
+    const [f, op, v] = c; const r = val(rec[f]);
+    switch (op) {
+      case '=': return r === v || (v === false && !r);
+      case '!=': return r !== v;
+      case '>': return r > v;
+      case 'in': return v.includes(r);
+      default: return true;
+    }
+  });
+}
+const pick = (r, fields) => (fields?.length ? Object.fromEntries(['id', ...fields].map((f) => [f, r[f] ?? false])) : r);
+
+function execute(model, method, args, kw) {
+  const rows = db[model] || [];
+  switch (method) {
+    case 'fields_get': return Object.fromEntries((fieldsOf[model] || []).map((f) => [f, { type: 'char' }]));
+    case 'search_read': {
+      let out = rows.filter((r) => match(r, args[0] || []));
+      if (kw.order?.startsWith('name')) out = [...out].sort((a, b) => a.name.localeCompare(b.name));
+      if (kw.order?.startsWith('date_order')) out = [...out].sort((a, b) => b.id - a.id);
+      return out.slice(0, kw.limit || 1e9).map((r) => pick(r, kw.fields));
+    }
+    case 'read': return rows.filter((r) => args[0].includes(r.id)).map((r) => pick(r, args[1] || kw.fields));
+    case 'create': {
+      const v = args[0]; const id = rows.length + 1;
+      let untaxed = 0; let tax = 0;
+      for (const [, , l] of v.order_line) {
+        const sub = l.price_unit * l.product_uom_qty; untaxed += sub; if (l.tax_id) tax += sub * 0.2;
+      }
+      rows.push({
+        id, name: `S${String(id).padStart(5, '0')}`, partner_id: m2o(db['res.partner'], v.partner_id), user_id: m2o(users, v.user_id),
+        date_order: new Date().toISOString().replace('T', ' ').slice(0, 19), state: 'draft',
+        amount_untaxed: +untaxed.toFixed(2), amount_tax: +tax.toFixed(2), amount_total: +(untaxed + tax).toFixed(2),
+      });
+      return id;
+    }
+    case 'action_confirm': args[0].forEach((id) => { const o = rows.find((r) => r.id === id); if (o) o.state = 'sale'; }); return true;
+    default: throw new Error(`Méthode non simulée : ${model}.${method}`);
+  }
+}
+
+http.createServer((req, res) => {
+  let body = '';
+  req.on('data', (c) => { body += c; });
+  req.on('end', () => {
+    const send = (payload) => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(payload)); };
+    try {
+      const { id, params } = JSON.parse(body || '{}');
+      const { service, method, args } = params;
+      if (service === 'common' && method === 'authenticate') {
+        const u = users.find((x) => x.login === args[1] && x.password === args[2]);
+        return send({ jsonrpc: '2.0', id, result: u ? u.id : false });
+      }
+      if (service === 'object' && method === 'execute_kw') {
+        const [, , , model, m, a = [], kw = {}] = args;
+        return send({ jsonrpc: '2.0', id, result: execute(model, m, a, kw) });
+      }
+      throw new Error('Service non simulé');
+    } catch (e) {
+      send({ jsonrpc: '2.0', error: { message: 'Odoo Server Error', data: { message: e.message } } });
+    }
+  });
+}).listen(8069, () => console.log('Faux Odoo (test) sur http://localhost:8069 — login app : salma@demo.ma / demo'));
+</file>
+
+<file path="backend/src/middleware/auth.js">
+import jwt from 'jsonwebtoken';
+import { config } from '../config.js';
+
+export function requireAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Session expirée, reconnectez-vous.' });
+  try {
+    req.user = jwt.verify(token, config.jwtSecret);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Session expirée, reconnectez-vous.' });
+  }
+}
+
+/** Enveloppe les handlers async pour transmettre les erreurs au gestionnaire global. */
+export const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+</file>
+
+<file path="backend/src/odoo/client.js">
+import { config } from '../config.js';
+
+let rpcId = 0;
+let serviceUid = null;
+const fieldsCache = new Map();
+
+export class OdooError extends Error {
+  constructor(message, status = 502) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function jsonRpc(service, method, args) {
+  let res;
+  try {
+    res = await fetch(`${config.odoo.url}/jsonrpc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: ++rpcId, params: { service, method, args } }),
+    });
+  } catch (e) {
+    throw new OdooError(`Odoo injoignable (${config.odoo.url}) : ${e.message}`, 503);
+  }
+  if (!res.ok) throw new OdooError(`Odoo a répondu HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) {
+    const msg = data.error.data?.message || data.error.message || 'Erreur Odoo';
+    throw new OdooError(msg);
+  }
+  return data.result;
+}
+
+/** Vérifie des identifiants Odoo. Retourne l'uid ou false. */
+export function authenticate(login, password) {
+  return jsonRpc('common', 'authenticate', [config.odoo.db, login, password, {}]);
+}
+
+async function getServiceUid() {
+  if (serviceUid) return serviceUid;
+  const uid = await authenticate(config.odoo.username, config.odoo.password);
+  if (!uid) throw new OdooError('Compte technique Odoo refusé : vérifier ODOO_USERNAME / ODOO_PASSWORD', 500);
+  serviceUid = uid;
+  return uid;
+}
+
+/** Appel execute_kw avec le compte technique. */
+export async function call(model, method, args = [], kwargs = {}) {
+  const uid = await getServiceUid();
+  return jsonRpc('object', 'execute_kw', [config.odoo.db, uid, config.odoo.password, model, method, args, kwargs]);
+}
+
+export const searchRead = (model, domain = [], fields = [], opts = {}) =>
+  call(model, 'search_read', [domain], { fields, ...opts });
+
+/** Champs disponibles d'un modèle (en cache) — permet de s'adapter aux versions/modules Odoo installés. */
+export async function modelFields(model) {
+  if (!fieldsCache.has(model)) {
+    const f = await call(model, 'fields_get', [], { attributes: ['type'] });
+    fieldsCache.set(model, new Set(Object.keys(f)));
+  }
+  return fieldsCache.get(model);
+}
+
+export function orderUrl(id) {
+  return `${config.odoo.publicUrl}/web#id=${id}&model=sale.order&view_type=form`;
+}
+</file>
+
+<file path="backend/src/routes/auth.js">
+import { Router } from 'express';
+import jwt from 'jsonwebtoken';
+import { config } from '../config.js';
+import { authenticate, call } from '../odoo/client.js';
+import { requireAuth, wrap } from '../middleware/auth.js';
+
+const router = Router();
+
+/** Connexion avec les identifiants Odoo du commercial. */
+router.post('/login', wrap(async (req, res) => {
+  const { login, password } = req.body || {};
+  if (!login || !password) return res.status(400).json({ error: 'Renseignez votre identifiant et votre mot de passe.' });
+
+  const uid = await authenticate(String(login).trim(), String(password));
+  if (!uid) return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect.' });
+
+  const [u] = await call('res.users', 'read', [[uid], ['name', 'login', 'email']]);
+  const user = { uid, name: u?.name || login, login: u?.login || login, email: u?.email || '' };
+  const token = jwt.sign(user, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
+  res.json({ token, user });
+}));
+
+router.get('/me', requireAuth, (req, res) => {
+  const { uid, name, login, email } = req.user;
+  res.json({ user: { uid, name, login, email } });
+});
+
+export default router;
+</file>
+
+<file path="backend/src/routes/clients.js">
+import { Router } from 'express';
+import { config } from '../config.js';
+import { call, searchRead, modelFields } from '../odoo/client.js';
+import { requireAuth, wrap } from '../middleware/auth.js';
+import { loadProducts, pricingContext, unitPrice, rulesFor } from '../services/pricing.js';
+
+const router = Router();
+router.use(requireAuth);
+
+function mapClient(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    city: p.city || '',
+    street: p.street || '',
+    email: p.email || '',
+    phone: p.phone || p.mobile || '',
+    pricelist: Array.isArray(p.property_product_pricelist) ? p.property_product_pricelist[1] : null,
+  };
+}
+
+async function clientFields() {
+  const f = await modelFields('res.partner');
+  return ['name', 'city', 'street', 'email', 'phone', 'mobile', 'property_product_pricelist'].filter((x) => f.has(x));
+}
+
+async function getClient(id) {
+  const [p] = await call('res.partner', 'read', [[id], await clientFields()]);
+  return p ? mapClient(p) : null;
+}
+
+/** Liste des clients. */
+router.get('/', wrap(async (req, res) => {
+  const f = await modelFields('res.partner');
+  const domain = [['active', '=', true]];
+  if (f.has('customer_rank')) domain.push(['customer_rank', '>', 0]);
+  else domain.push(['is_company', '=', true]);
+  if (config.clientsOnlyMine) domain.push(['user_id', '=', req.user.uid]);
+  const rows = await searchRead('res.partner', domain, await clientFields(), { order: 'name asc', limit: 1000 });
+  res.json({ clients: rows.map(mapClient) });
+}));
+
+router.get('/:id', wrap(async (req, res) => {
+  const client = await getClient(Number(req.params.id));
+  if (!client) return res.status(404).json({ error: 'Client introuvable.' });
+  res.json({ client });
+}));
+
+/** Produits avec le prix propre au client (quantité 1). */
+router.get('/:id/products', wrap(async (req, res) => {
+  const partnerId = Number(req.params.id);
+  const [products, ctx] = await Promise.all([loadProducts(), pricingContext(partnerId)]);
+  const out = [];
+  for (const p of products) out.push({ ...p, price: await unitPrice(p, 1, ctx), cost: undefined });
+  res.json({ products: out, pricelist: ctx.pricelist?.name || null });
+}));
+
+/** Détail d'un produit pour ce client, avec les règles de calcul de sa liste de prix. */
+router.get('/:id/products/:productId', wrap(async (req, res) => {
+  const partnerId = Number(req.params.id);
+  const [[product], ctx] = await Promise.all([
+    loadProducts({ ids: [Number(req.params.productId)] }),
+    pricingContext(partnerId),
+  ]);
+  if (!product) return res.status(404).json({ error: 'Produit introuvable ou non vendable.' });
+  res.json({
+    product: { ...product, price: await unitPrice(product, 1, ctx), cost: undefined },
+    ...rulesFor(product, ctx),
+    vatRate: config.vatRate,
+  });
+}));
+
+/** Prix unitaires selon les quantités (les règles Odoo peuvent dépendre de la quantité). */
+router.post('/:id/quote', wrap(async (req, res) => {
+  const partnerId = Number(req.params.id);
+  const lines = Array.isArray(req.body?.lines) ? req.body.lines : [];
+  const ids = [...new Set(lines.map((l) => Number(l.productId)).filter(Boolean))];
+  if (!ids.length) return res.json({ lines: [] });
+  const [products, ctx] = await Promise.all([loadProducts({ ids }), pricingContext(partnerId)]);
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const out = [];
+  for (const l of lines) {
+    const p = byId.get(Number(l.productId));
+    if (!p) continue;
+    const qty = Math.max(1, Number(l.qty) || 1);
+    out.push({ productId: p.id, qty, unitPrice: await unitPrice(p, qty, ctx) });
+  }
+  res.json({ lines: out });
+}));
+
+export default router;
+</file>
+
+<file path="backend/src/routes/orders.js">
+import { Router } from 'express';
+import { config } from '../config.js';
+import { call, searchRead, modelFields, orderUrl } from '../odoo/client.js';
+import { requireAuth, wrap } from '../middleware/auth.js';
+import { loadProducts, pricingContext, unitPrice } from '../services/pricing.js';
+
+const router = Router();
+router.use(requireAuth);
+
+const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+const ORDER_FIELDS = ['name', 'partner_id', 'date_order', 'amount_untaxed', 'amount_tax', 'amount_total', 'state', 'user_id'];
+
+const STATE_LABELS = { draft: 'Devis', sent: 'Devis envoyé', sale: 'Confirmée', done: 'Verrouillée', cancel: 'Annulée' };
+
+function mapOrder(o) {
+  return {
+    id: o.id,
+    number: o.name,
+    clientId: Array.isArray(o.partner_id) ? o.partner_id[0] : null,
+    client: Array.isArray(o.partner_id) ? o.partner_id[1] : '',
+    date: o.date_order,
+    amountUntaxed: o.amount_untaxed,
+    amountTax: o.amount_tax,
+    amountTotal: o.amount_total,
+    state: o.state,
+    stateLabel: STATE_LABELS[o.state] || o.state,
+    odooUrl: orderUrl(o.id),
+  };
+}
+
+const ownDomain = (uid) => (config.ordersOnlyMine ? [['user_id', '=', uid]] : []);
+
+let taxCache;
+async function vatTaxId() {
+  if (config.odoo.taxId) return config.odoo.taxId;
+  if (taxCache !== undefined) return taxCache;
+  const [tax] = await searchRead('account.tax',
+    [['type_tax_use', '=', 'sale'], ['amount_type', '=', 'percent'], ['amount', '=', 20]], ['id'], { limit: 1 });
+  taxCache = tax?.id || null;
+  if (!taxCache) console.warn('[orders] Aucune taxe de vente à 20 % trouvée dans Odoo — définir ODOO_TAX_ID.');
+  return taxCache;
+}
+
+/** Statistiques du tableau de bord (calculées à partir des vraies commandes Odoo). */
+router.get('/stats', wrap(async (req, res) => {
+  const orders = await searchRead('sale.order', [...ownDomain(req.user.uid), ['state', '!=', 'cancel']],
+    ['partner_id', 'amount_total', 'state'], { limit: 5000 });
+  const confirmed = orders.filter((o) => o.state === 'sale' || o.state === 'done');
+  res.json({
+    totalOrders: orders.length,
+    revenue: round2(confirmed.reduce((s, o) => s + (o.amount_total || 0), 0)),
+    activeClients: new Set(orders.map((o) => o.partner_id?.[0]).filter(Boolean)).size,
+    pendingOrders: orders.filter((o) => o.state === 'draft' || o.state === 'sent').length,
+  });
+}));
+
+router.get('/', wrap(async (req, res) => {
+  const rows = await searchRead('sale.order', ownDomain(req.user.uid), ORDER_FIELDS, { order: 'date_order desc', limit: 200 });
+  res.json({ orders: rows.map(mapOrder) });
+}));
+
+router.get('/:id', wrap(async (req, res) => {
+  const [o] = await call('sale.order', 'read', [[Number(req.params.id)], ORDER_FIELDS]);
+  if (!o) return res.status(404).json({ error: 'Commande introuvable.' });
+  res.json({ order: mapOrder(o) });
+}));
+
+/** Création de la commande dans Odoo. Les prix sont recalculés côté serveur. */
+router.post('/', wrap(async (req, res) => {
+  const partnerId = Number(req.body?.clientId);
+  const lines = (Array.isArray(req.body?.lines) ? req.body.lines : [])
+    .map((l) => ({ productId: Number(l.productId), qty: Math.max(0, Number(l.qty) || 0) }))
+    .filter((l) => l.productId && l.qty > 0);
+  if (!partnerId) return res.status(400).json({ error: 'Client manquant.' });
+  if (!lines.length) return res.status(400).json({ error: 'Le panier est vide.' });
+
+  const [products, ctx, taxId, lineFields, orderFields] = await Promise.all([
+    loadProducts({ ids: lines.map((l) => l.productId) }),
+    pricingContext(partnerId),
+    vatTaxId(),
+    modelFields('sale.order.line'),
+    modelFields('sale.order'),
+  ]);
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const taxField = lineFields.has('tax_id') ? 'tax_id' : lineFields.has('tax_ids') ? 'tax_ids' : null;
+
+  const orderLines = [];
+  const detail = [];
+  for (const l of lines) {
+    const p = byId.get(l.productId);
+    if (!p) return res.status(400).json({ error: `Produit ${l.productId} introuvable ou non vendable.` });
+    const price = await unitPrice(p, l.qty, ctx);
+    const vals = { product_id: p.id, product_uom_qty: l.qty, price_unit: price };
+    if (taxId && taxField) vals[taxField] = [[6, 0, [taxId]]];
+    orderLines.push([0, 0, vals]);
+    detail.push({ productId: p.id, name: p.name, qty: l.qty, unitPrice: price, subtotal: round2(price * l.qty) });
+  }
+
+  const vals = { partner_id: partnerId, user_id: req.user.uid, order_line: orderLines };
+  if (ctx.pricelist && orderFields.has('pricelist_id')) vals.pricelist_id = ctx.pricelist.id;
+
+  const orderId = await call('sale.order', 'create', [vals]);
+  if (config.odoo.confirmOrder) await call('sale.order', 'action_confirm', [[orderId]]);
+
+  const [o] = await call('sale.order', 'read', [[orderId], ORDER_FIELDS]);
+  const totalHT = round2(detail.reduce((s, d) => s + d.subtotal, 0));
+  const vat = round2(totalHT * config.vatRate);
+  res.status(201).json({
+    order: mapOrder(o),
+    lines: detail,
+    totals: { totalHT, vat, totalTTC: round2(totalHT + vat), vatRate: config.vatRate },
+  });
+}));
+
+export default router;
+</file>
+
+<file path="backend/src/services/pricing.js">
+/**
+ * Calcul des prix client à partir des listes de prix Odoo (product.pricelist.item).
+ * Reproduit la logique standard d'Odoo : prix fixe, remise en %, formule
+ * (remise + arrondi + supplément + marges), avec quantité minimale et dates de validité.
+ */
+import { searchRead, modelFields, call } from '../odoo/client.js';
+
+const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+const idOf = (m2o) => (Array.isArray(m2o) ? m2o[0] : m2o || null);
+
+/* ---------- Chargement des données Odoo ---------- */
+
+export async function loadProducts({ ids = null } = {}) {
+  const fields = await modelFields('product.product');
+  const wanted = ['name', 'default_code', 'lst_price', 'standard_price', 'categ_id', 'product_tmpl_id', 'uom_id', 'description_sale', 'image_128'];
+  if (fields.has('qty_available')) wanted.push('qty_available');
+  const domain = [['sale_ok', '=', true], ['active', '=', true]];
+  if (ids) domain.push(['id', 'in', ids]);
+  const rows = await searchRead('product.product', domain, wanted.filter((f) => fields.has(f)), { order: 'name asc', limit: 2000 });
+  return rows.map((p) => ({
+    id: p.id,
+    name: p.name,
+    reference: p.default_code || '',
+    listPrice: p.lst_price || 0,
+    cost: p.standard_price || 0,
+    categoryId: idOf(p.categ_id),
+    category: Array.isArray(p.categ_id) ? p.categ_id[1].split(' / ').pop() : '',
+    templateId: idOf(p.product_tmpl_id),
+    uom: Array.isArray(p.uom_id) ? p.uom_id[1] : '',
+    description: p.description_sale || '',
+    image: p.image_128 ? `data:image/png;base64,${p.image_128}` : null,
+    stock: p.qty_available ?? null,
+  }));
+}
+
+async function loadCategoryPaths() {
+  const cats = await searchRead('product.category', [], ['parent_path']);
+  return new Map(cats.map((c) => [c.id, c.parent_path || `${c.id}/`]));
+}
+
+export async function partnerPricelistId(partnerId) {
+  const fields = await modelFields('res.partner');
+  if (!fields.has('property_product_pricelist')) return null;
+  const [p] = await call('res.partner', 'read', [[partnerId], ['property_product_pricelist']]);
+  return idOf(p?.property_product_pricelist);
+}
+
+const ITEM_FIELDS = [
+  'applied_on', 'product_id', 'product_tmpl_id', 'categ_id', 'min_quantity', 'compute_price',
+  'fixed_price', 'percent_price', 'price_discount', 'price_surcharge', 'price_round',
+  'price_min_margin', 'price_max_margin', 'base', 'base_pricelist_id', 'date_start', 'date_end',
+];
+
+async function loadPricelist(pricelistId, cache) {
+  if (!pricelistId) return null;
+  if (cache.has(pricelistId)) return cache.get(pricelistId);
+  const fields = await modelFields('product.pricelist.item');
+  const [pl] = await call('product.pricelist', 'read', [[pricelistId], ['name']]);
+  const items = await searchRead('product.pricelist.item', [['pricelist_id', '=', pricelistId]],
+    ITEM_FIELDS.filter((f) => fields.has(f)));
+  // Ordre de priorité Odoo : variante > modèle > catégorie > global, puis quantité min décroissante
+  items.sort((a, b) =>
+    String(a.applied_on).localeCompare(String(b.applied_on)) ||
+    (b.min_quantity || 0) - (a.min_quantity || 0) ||
+    (idOf(b.categ_id) || 0) - (idOf(a.categ_id) || 0) ||
+    b.id - a.id);
+  const value = { id: pricelistId, name: pl?.name || 'Liste de prix', items };
+  cache.set(pricelistId, value);
+  return value;
+}
+
+/* ---------- Moteur de calcul ---------- */
+
+function itemMatches(item, product, qty, catPaths, today) {
+  if ((item.min_quantity || 0) > qty) return false;
+  if (item.date_start && String(item.date_start).slice(0, 10) > today) return false;
+  if (item.date_end && String(item.date_end).slice(0, 10) < today) return false;
+  switch (item.applied_on) {
+    case '0_product_variant': return idOf(item.product_id) === product.id;
+    case '1_product': return idOf(item.product_tmpl_id) === product.templateId;
+    case '2_product_category': {
+      const path = catPaths.get(product.categoryId) || '';
+      return `/${path}`.includes(`/${idOf(item.categ_id)}/`);
+    }
+    default: return true;
+  }
+}
+
+function roundTo(value, step) {
+  return step ? Math.round(value / step) * step : value;
+}
+
+async function priceFor(product, qty, pricelist, ctx, depth = 0) {
+  if (!pricelist || depth > 4) return { price: product.listPrice, rule: null };
+  const item = pricelist.items.find((it) => itemMatches(it, product, qty, ctx.catPaths, ctx.today));
+  if (!item) return { price: product.listPrice, rule: null };
+
+  const basePrice = async () => {
+    if (item.base === 'standard_price') return product.cost;
+    if (item.base === 'pricelist' && item.base_pricelist_id) {
+      const parent = await loadPricelist(idOf(item.base_pricelist_id), ctx.cache);
+      return (await priceFor(product, qty, parent, ctx, depth + 1)).price;
+    }
+    return product.listPrice;
+  };
+
+  let price;
+  if (item.compute_price === 'fixed') {
+    price = item.fixed_price || 0;
+  } else if (item.compute_price === 'percentage') {
+    const base = await basePrice();
+    price = base - (base * (item.percent_price || 0)) / 100;
+  } else {
+    const base = await basePrice();
+    price = base - (base * (item.price_discount || 0)) / 100;
+    if (item.price_round) price = roundTo(price, item.price_round);
+    if (item.price_surcharge) price += item.price_surcharge;
+    if (item.price_min_margin) price = Math.max(price, base + item.price_min_margin);
+    if (item.price_max_margin) price = Math.min(price, base + item.price_max_margin);
+  }
+  return { price: round2(price), rule: item };
+}
+
+/** Contexte de calcul pour un client (liste de prix, catégories). */
+export async function pricingContext(partnerId) {
+  const cache = new Map();
+  const [pricelistId, catPaths] = await Promise.all([partnerPricelistId(partnerId), loadCategoryPaths()]);
+  const pricelist = await loadPricelist(pricelistId, cache);
+  return { pricelist, catPaths, cache, today: new Date().toISOString().slice(0, 10) };
+}
+
+export async function unitPrice(product, qty, ctx) {
+  return (await priceFor(product, qty, ctx.pricelist, ctx)).price;
+}
+
+/* ---------- Description lisible des règles ---------- */
+
+const fmt = (n) => `${Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} DH`;
+const baseLabel = (item) =>
+  item.base === 'standard_price' ? 'coût' : item.base === 'pricelist' ? `liste « ${item.base_pricelist_id?.[1] || 'parente'} »` : 'prix public';
+
+function describeItem(item) {
+  const parts = [];
+  if (item.compute_price === 'fixed') parts.push(`Prix fixe : ${fmt(item.fixed_price)}`);
+  else if (item.compute_price === 'percentage') parts.push(`Remise de ${item.percent_price} % sur le ${baseLabel(item)}`);
+  else {
+    let f = `Formule : ${baseLabel(item)}`;
+    if (item.price_discount) f += ` − ${item.price_discount} %`;
+    if (item.price_surcharge) f += ` ${item.price_surcharge > 0 ? '+' : '−'} ${fmt(Math.abs(item.price_surcharge))}`;
+    if (item.price_round) f += `, arrondi à ${item.price_round}`;
+    parts.push(f);
+  }
+  const scope = {
+    '0_product_variant': 'ce produit',
+    '1_product': 'ce produit',
+    '2_product_category': `catégorie ${item.categ_id?.[1] || ''}`.trim(),
+    '3_global': 'tous les produits',
+  }[item.applied_on] || 'tous les produits';
+  return {
+    minQuantity: item.min_quantity || 0,
+    scope,
+    label: parts.join(' '),
+    validity: item.date_start || item.date_end
+      ? `${item.date_start ? `du ${String(item.date_start).slice(0, 10)}` : ''} ${item.date_end ? `au ${String(item.date_end).slice(0, 10)}` : ''}`.trim()
+      : null,
+  };
+}
+
+/** Règles de la liste de prix du client qui s'appliquent à ce produit (toutes quantités). */
+export function rulesFor(product, ctx) {
+  if (!ctx.pricelist) return { pricelist: null, rules: [] };
+  const rules = ctx.pricelist.items
+    .filter((it) => itemMatches({ ...it, min_quantity: 0, date_start: false, date_end: false }, product, 1, ctx.catPaths, ctx.today))
+    .map(describeItem)
+    .sort((a, b) => a.minQuantity - b.minQuantity);
+  return { pricelist: ctx.pricelist.name, rules };
+}
+</file>
+
+<file path="backend/src/app.js">
+import express from 'express';
+import cors from 'cors';
+import { config } from './config.js';
+import authRoutes from './routes/auth.js';
+import clientRoutes from './routes/clients.js';
+import orderRoutes from './routes/orders.js';
+
+const app = express();
+app.use(cors({ origin: config.corsOrigin }));
+app.use(express.json({ limit: '1mb' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, vatRate: config.vatRate }));
+app.use('/api/auth', authRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api', (req, res) => res.status(404).json({ error: 'Route inconnue.' }));
+app.use((err, req, res, next) => {
+  console.error(`[${req.method} ${req.originalUrl}]`, err.message);
+  res.status(err.status || 500).json({ error: err.message || 'Erreur serveur.' });
+});
+
+export default app;
+</file>
+
+<file path="backend/src/config.js">
+import 'dotenv/config';
+
+const bool = (v, def = false) => (v === undefined || v === '' ? def : String(v).toLowerCase() === 'true');
+
+function required(name) {
+  const v = process.env[name];
+  if (!v) {
+    console.error(`[config] Variable manquante : ${name} (voir backend/.env.example)`);
+    process.exit(1);
+  }
+  return v;
+}
+
+const odooUrl = required('ODOO_URL').replace(/\/+$/, '');
+
+export const config = {
+  port: Number(process.env.PORT) || 4001,
+  corsOrigin: (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map((s) => s.trim()),
+  jwtSecret: required('JWT_SECRET'),
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '12h',
+  odoo: {
+    url: odooUrl,
+    publicUrl: (process.env.ODOO_PUBLIC_URL || odooUrl).replace(/\/+$/, ''),
+    db: required('ODOO_DB'),
+    username: required('ODOO_USERNAME'),
+    password: required('ODOO_PASSWORD'),
+    confirmOrder: bool(process.env.ODOO_CONFIRM_ORDER, true),
+    taxId: process.env.ODOO_TAX_ID ? Number(process.env.ODOO_TAX_ID) : null,
+  },
+  clientsOnlyMine: bool(process.env.CLIENTS_ONLY_MINE, false),
+  ordersOnlyMine: bool(process.env.ORDERS_ONLY_MINE, true),
+  vatRate: 0.2, // TVA fixée à 20 %
+};
+</file>
+
+<file path="backend/src/server.js">
+import app from './app.js';
+import { config } from './config.js';
+
+app.listen(config.port, () => {
+  console.log(`Backend CommercialApp : http://localhost:${config.port}`);
+});
+</file>
+
+<file path="backend/package.json">
+{
+  "name": "commercial-order-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "mock:odoo": "node dev/mock-odoo.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+</file>
+
+<file path="backend/vercel.json">
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}
+</file>
+
+<file path="frontend/public/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0B1F3A"/><path d="M16 6l9 5v10l-9 5-9-5V11z" fill="none" stroke="#FF7A00" stroke-width="2.2" stroke-linejoin="round"/><path d="M7 11l9 5 9-5M16 16v10" fill="none" stroke="#FF7A00" stroke-width="2.2" stroke-linejoin="round"/></svg>
+</file>
+
+<file path="frontend/src/components/Cart.jsx">
+import { useNavigate } from 'react-router-dom';
+import { ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { formatDH } from '../lib/format';
+import { useCart } from '../context/CartContext';
+import { usePricedLines } from '../lib/usePricedLines';
+import { Button, QuantityStepper, ProductThumb, EmptyState } from './ui';
+import OrderSummary from './OrderSummary';
+
+export default function Cart({ client, onNavigate }) {
+  const cart = useCart();
+  const navigate = useNavigate();
+  const items = cart.getItems(client.id);
+  const { lines, totals, pricing } = usePricedLines(client.id, items);
+  const count = items.reduce((s, i) => s + i.qty, 0);
+
+  return (
+    <section className="cart" aria-label="Panier">
+      <div className="cart__head">
+        <h2>Panier</h2>
+        {count > 0 && <span className="badge badge--orange">{count} article{count > 1 ? 's' : ''}</span>}
+      </div>
+
+      {lines.length === 0 ? (
+        <EmptyState icon={ShoppingCart} title="Panier vide" text="Ajoutez des produits depuis la liste pour préparer la commande." />
+      ) : (
+        <>
+          <ul className="cart__lines">
+            {lines.map((l) => (
+              <li key={l.product.id} className="cart-line">
+                <ProductThumb product={l.product} size={40} />
+                <div className="cart-line__body">
+                  <div className="cart-line__top">
+                    <strong>{l.product.name}</strong>
+                    <button className="icon-btn icon-btn--sm" onClick={() => cart.remove(client, l.product.id)} aria-label={`Retirer ${l.product.name}`} title="Retirer"><Trash2 size={15} /></button>
+                  </div>
+                  <span className="muted">{formatDH(l.unitPrice)} / unité</span>
+                  <div className="cart-line__bottom">
+                    <QuantityStepper size="sm" value={l.qty} onChange={(q) => cart.setQty(client, l.product.id, q)} />
+                    <span className="strong">{formatDH(l.subtotal)}</span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <OrderSummary totals={totals} compact pricing={pricing} />
+          <Button
+            className="btn--block" iconRight={ArrowRight}
+            onClick={() => { onNavigate?.(); navigate(`/clients/${client.id}/confirmation`); }}
+          >
+            Passer à la confirmation
+          </Button>
+        </>
+      )}
+    </section>
+  );
+}
+</file>
+
+<file path="frontend/src/components/ClientCard.jsx">
+import { Link } from 'react-router-dom';
+import { MapPin, ArrowRight } from 'lucide-react';
+import { Avatar } from './ui';
+
+export default function ClientCard({ client, cartCount = 0 }) {
+  return (
+    <Link to={`/clients/${client.id}`} className="client-card">
+      <div className="client-card__head">
+        <Avatar name={client.name} size={42} />
+        <div className="client-card__id">
+          <strong title={client.name}>{client.name}</strong>
+          <span><MapPin size={13} />{client.city || 'Ville non renseignée'}</span>
+        </div>
+      </div>
+      <div className="client-card__foot">
+        {cartCount > 0
+          ? <span className="badge badge--orange">{cartCount} article{cartCount > 1 ? 's' : ''} au panier</span>
+          : <span className="client-card__pl">{client.pricelist || 'Tarif standard'}</span>}
+        <span className="client-card__cta">Voir les produits <ArrowRight size={15} /></span>
+      </div>
+    </Link>
+  );
+}
+</file>
+
+<file path="frontend/src/components/Header.jsx">
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Menu } from 'lucide-react';
+import { SearchInput, Avatar } from './ui';
+import { useAuth } from '../context/AuthContext';
+
+export default function Header({ onMenu }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [q, setQ] = useState('');
+  const submit = (e) => {
+    e.preventDefault();
+    navigate(`/clients${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`);
+    setQ('');
+  };
+  return (
+    <header className="topbar">
+      <button className="icon-btn topbar__menu" onClick={onMenu} aria-label="Ouvrir le menu"><Menu size={20} /></button>
+      <form onSubmit={submit} className="topbar__search">
+        <SearchInput value={q} onChange={setQ} placeholder="Rechercher un client…" />
+      </form>
+      <div className="topbar__user">
+        <div className="topbar__user-info">
+          <strong>{user?.name}</strong>
+          <span>{user?.login}</span>
+        </div>
+        <Avatar name={user?.name} size={36} tone="orange" />
+      </div>
+    </header>
+  );
+}
+</file>
+
+<file path="frontend/src/components/Layout.jsx">
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Header from './Header';
+
+export default function Layout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    <div className="app">
+      <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <div className="app__main">
+        <Header onMenu={() => setMenuOpen(true)} />
+        <main className="page"><Outlet /></main>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/components/LoginIllustration.jsx">
+/** Illustration vectorielle : rayonnages d'un entrepôt de distribution. */
+export default function LoginIllustration() {
+  const box = (x, y, w, h, c) => <rect x={x} y={y} width={w} height={h} rx="3" fill={c} />;
+  const shelf = (y) => (
+    <g>
+      <rect x="20" y={y} width="360" height="6" rx="2" fill="#1E3A63" />
+      {box(34, y - 44, 52, 44, '#2563EB')}{box(92, y - 30, 38, 30, '#1E4E9E')}
+      {box(140, y - 52, 46, 52, '#FF7A00')}{box(194, y - 36, 60, 36, '#2B4A78')}
+      {box(262, y - 46, 40, 46, '#2563EB')}{box(310, y - 28, 56, 28, '#FF9A3D')}
+    </g>
+  );
+  return (
+    <svg className="login__art" viewBox="0 0 400 250" role="img" aria-label="Rayonnages de produits">
+      <rect x="10" y="8" width="380" height="234" rx="14" fill="#10284A" />
+      <rect x="20" y="18" width="6" height="214" fill="#1E3A63" /><rect x="374" y="18" width="6" height="214" fill="#1E3A63" />
+      {shelf(88)}{shelf(158)}{shelf(228)}
+    </svg>
+  );
+}
+</file>
+
+<file path="frontend/src/components/OrderSummary.jsx">
+import { formatDH } from '../lib/format';
+
+export default function OrderSummary({ totals, compact = false, pricing = false }) {
+  return (
+    <div className={`summary ${compact ? 'summary--compact' : ''} ${pricing ? 'is-pricing' : ''}`}>
+      <div className="summary__row"><span>Total HT</span><span>{formatDH(totals.totalHT)}</span></div>
+      <div className="summary__row summary__row--muted"><span>TVA (20 %)</span><span>{formatDH(totals.vat)}</span></div>
+      <div className="summary__row summary__row--total"><span>Total TTC</span><span>{formatDH(totals.totalTTC)}</span></div>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/components/PageHeader.jsx">
+export default function PageHeader({ title, subtitle, back, actions }) {
+  return (
+    <div className="page-header">
+      <div>
+        {back}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+      {actions && <div className="page-header__actions">{actions}</div>}
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/components/ProductCard.jsx">
+import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
+import { formatDH } from '../lib/format';
+import { Button, ProductThumb } from './ui';
+import StockBadge from './StockBadge';
+
+export default function ProductCard({ product: p, clientId, qty, onAdd }) {
+  return (
+    <div className="product-card">
+      <Link to={`/clients/${clientId}/produits/${p.id}`} className="product-card__head">
+        <ProductThumb product={p} size={48} />
+        <div>
+          <strong>{p.name}</strong>
+          <span className="muted">{[p.reference, p.category].filter(Boolean).join(' – ')}</span>
+        </div>
+      </Link>
+      <dl className="product-card__meta">
+        <div><dt>Prix client</dt><dd className="strong">{formatDH(p.price)}</dd></div>
+        <div><dt>Stock</dt><dd><StockBadge stock={p.stock} /></dd></div>
+      </dl>
+      <Button size="sm" variant={qty ? 'soft' : 'primary'} icon={Plus} onClick={() => onAdd(p)} className="product-card__btn">
+        Ajouter{qty > 0 && <span className="btn__count">{qty}</span>}
+      </Button>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/components/ProductTable.jsx">
+import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
+import { formatDH } from '../lib/format';
+import { Button, ProductThumb } from './ui';
+import StockBadge from './StockBadge';
+
+export default function ProductTable({ products, clientId, inCart, onAdd }) {
+  return (
+    <div className="table-wrap">
+      <table className="table table--products">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Référence</th>
+            <th>Catégorie</th>
+            <th className="num">Prix client</th>
+            <th className="num">Stock</th>
+            <th className="num"><span className="sr-only">Action</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((p) => {
+            const qty = inCart(p.id);
+            return (
+              <tr key={p.id}>
+                <td>
+                  <Link to={`/clients/${clientId}/produits/${p.id}`} className="product-cell">
+                    <ProductThumb product={p} size={40} />
+                    <span>{p.name}</span>
+                  </Link>
+                </td>
+                <td className="muted mono-num">{p.reference || '—'}</td>
+                <td className="muted">{p.category || '—'}</td>
+                <td className="num strong">
+                  {formatDH(p.price)}
+                  {p.price < p.listPrice && <s className="list-price">{formatDH(p.listPrice)}</s>}
+                </td>
+                <td className="num"><StockBadge stock={p.stock} /></td>
+                <td className="num">
+                  <Button size="sm" variant={qty ? 'soft' : 'primary'} icon={Plus} onClick={() => onAdd(p)} title={qty ? `${qty} déjà au panier` : undefined}>
+                    Ajouter{qty > 0 && <span className="btn__count">{qty}</span>}
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/components/Sidebar.jsx">
+import { NavLink } from 'react-router-dom';
+import { Home, Users, Package, ClipboardList, Settings, LogOut, X } from 'lucide-react';
+import { Logo, Avatar } from './ui';
+import { useAuth } from '../context/AuthContext';
+
+const NAV = [
+  { to: '/', label: 'Accueil', icon: Home, end: true },
+  { to: '/clients', label: 'Mes clients', icon: Users },
+  { to: '/produits', label: 'Produits', icon: Package },
+  { to: '/commandes', label: 'Commandes', icon: ClipboardList },
+  { to: '/parametres', label: 'Paramètres', icon: Settings },
+];
+
+export default function Sidebar({ open, onClose }) {
+  const { user, logout } = useAuth();
+  return (
+    <>
+      <div className={`sidebar-backdrop ${open ? 'is-open' : ''}`} onClick={onClose} />
+      <aside className={`sidebar ${open ? 'is-open' : ''}`}>
+        <div className="sidebar__top">
+          <Logo light />
+          <button className="icon-btn sidebar__close" onClick={onClose} aria-label="Fermer le menu"><X size={18} /></button>
+        </div>
+        <nav className="sidebar__nav" aria-label="Navigation principale">
+          {NAV.map(({ to, label, icon: Icon, end }) => (
+            <NavLink key={to} to={to} end={end} onClick={onClose} className={({ isActive }) => `nav-item ${isActive ? 'is-active' : ''}`}>
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="sidebar__user">
+          <Avatar name={user?.name} size={38} tone="orange" />
+          <div className="sidebar__user-info">
+            <strong>{user?.name}</strong>
+            <span>Commercial</span>
+          </div>
+          <button className="icon-btn icon-btn--dark" onClick={logout} title="Déconnexion" aria-label="Déconnexion"><LogOut size={17} /></button>
+        </div>
+      </aside>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/components/StockBadge.jsx">
+export default function StockBadge({ stock }) {
+  if (stock === null || stock === undefined) return <span className="muted">—</span>;
+  const n = Number(stock);
+  const tone = n <= 0 ? 'red' : n < 20 ? 'amber' : 'green';
+  return <span className={`stock stock--${tone}`}>{n <= 0 ? 'Rupture' : Number.isInteger(n) ? n : n.toFixed(2)}</span>;
+}
+</file>
+
+<file path="frontend/src/components/ui.jsx">
+import { forwardRef, useEffect } from 'react';
+import { Loader2, X, AlertCircle, Minus, Plus, PackageOpen } from 'lucide-react';
+import { initials } from '../lib/format';
+
+export function Button({ variant = 'primary', size = 'md', icon: Icon, iconRight: IconRight, loading, children, className = '', as: Tag = 'button', ...props }) {
+  return (
+    <Tag className={`btn btn--${variant} btn--${size} ${className}`} disabled={Tag === 'button' ? (loading || props.disabled) : undefined} {...props}>
+      {loading ? <Loader2 size={16} className="spin" /> : Icon && <Icon size={16} />}
+      {children && <span>{children}</span>}
+      {IconRight && !loading && <IconRight size={16} />}
+    </Tag>
+  );
+}
+
+export const Input = forwardRef(function Input({ icon: Icon, label, id, right, className = '', ...props }, ref) {
+  return (
+    <div className={`field ${className}`}>
+      {label && <label htmlFor={id} className="field__label">{label}</label>}
+      <div className="field__control">
+        {Icon && <Icon size={18} className="field__icon" />}
+        <input ref={ref} id={id} className={`input ${Icon ? 'input--icon' : ''}`} {...props} />
+        {right}
+      </div>
+    </div>
+  );
+});
+
+export function SearchInput({ value, onChange, placeholder, className = '', ...props }) {
+  return (
+    <div className={`search ${className}`}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+      <input type="search" className="input input--icon" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} aria-label={placeholder} {...props} />
+    </div>
+  );
+}
+
+export function Modal({ open, onClose, title, children, variant = 'center' }) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className={`modal modal--${variant}`} role="dialog" aria-modal="true" aria-label={title}>
+      <div className="modal__backdrop" onClick={onClose} />
+      <div className="modal__panel">
+        <div className="modal__head">
+          <h2>{title}</h2>
+          <button className="icon-btn" onClick={onClose} aria-label="Fermer"><X size={18} /></button>
+        </div>
+        <div className="modal__body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+export function QuantityStepper({ value, onChange, min = 1, size = 'md' }) {
+  return (
+    <div className={`stepper stepper--${size}`}>
+      <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="Diminuer"><Minus size={14} /></button>
+      <input
+        type="number" inputMode="numeric" min={min} value={value} aria-label="Quantité"
+        onChange={(e) => { const n = parseInt(e.target.value, 10); if (!Number.isNaN(n)) onChange(Math.max(min, n)); }}
+      />
+      <button type="button" onClick={() => onChange(value + 1)} aria-label="Augmenter"><Plus size={14} /></button>
+    </div>
+  );
+}
+
+export function Avatar({ name, size = 40, tone }) {
+  const tones = ['blue', 'orange', 'navy', 'green'];
+  const t = tone || tones[[...String(name)].reduce((s, c) => s + c.charCodeAt(0), 0) % tones.length];
+  return <span className={`avatar avatar--${t}`} style={{ width: size, height: size, fontSize: size * 0.34 }}>{initials(name)}</span>;
+}
+
+export function ProductThumb({ product, size = 44 }) {
+  return product.image
+    ? <img className="thumb" src={product.image} alt="" width={size} height={size} />
+    : <span className="thumb thumb--empty" style={{ width: size, height: size }}><PackageOpen size={size * 0.45} /></span>;
+}
+
+export function Spinner({ label = 'Chargement…' }) {
+  return <div className="state state--loading"><Loader2 size={22} className="spin" /><span>{label}</span></div>;
+}
+
+export function Skeleton({ rows = 4, height = 64 }) {
+  return <div className="skeletons">{Array.from({ length: rows }, (_, i) => <div key={i} className="skeleton" style={{ height }} />)}</div>;
+}
+
+export function EmptyState({ icon: Icon = PackageOpen, title, text, action }) {
+  return (
+    <div className="state state--empty">
+      <span className="state__icon"><Icon size={22} /></span>
+      <strong>{title}</strong>
+      {text && <p>{text}</p>}
+      {action}
+    </div>
+  );
+}
+
+export function ErrorState({ message, onRetry }) {
+  return (
+    <div className="state state--error">
+      <span className="state__icon"><AlertCircle size={22} /></span>
+      <strong>Chargement impossible</strong>
+      <p>{message}</p>
+      {onRetry && <Button variant="secondary" size="sm" onClick={onRetry}>Réessayer</Button>}
+    </div>
+  );
+}
+
+export function Logo({ light = false }) {
+  return (
+    <span className={`logo ${light ? 'logo--light' : ''}`}>
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" className="logo__bg" />
+        <path d="M16 6l9 5v10l-9 5-9-5V11z M7 11l9 5 9-5 M16 16v10" fill="none" stroke="#FF7A00" strokeWidth="2.2" strokeLinejoin="round" />
+      </svg>
+      <span>CommercialApp</span>
+    </span>
+  );
+}
+</file>
+
+<file path="frontend/src/context/AuthContext.jsx">
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { api, tokenStore, setUnauthorizedHandler } from '../lib/api';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  const logout = useCallback(() => {
+    tokenStore.clear();
+    setUser(null);
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(logout);
+    if (!tokenStore.get()) { setReady(true); return; }
+    api.me()
+      .then((d) => setUser(d.user))
+      .catch(() => tokenStore.clear())
+      .finally(() => setReady(true));
+  }, [logout]);
+
+  const login = async (login, password) => {
+    const d = await api.login(login, password);
+    tokenStore.set(d.token);
+    setUser(d.user);
+    return d.user;
+  };
+
+  return <AuthContext.Provider value={{ user, ready, login, logout }}>{children}</AuthContext.Provider>;
+}
+
+export const useAuth = () => useContext(AuthContext);
+</file>
+
+<file path="frontend/src/context/CartContext.jsx">
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useAuth } from './AuthContext';
+
+/**
+ * Un panier par client, conservé dans le navigateur.
+ * carts = { [clientId]: { client: {id,name,city}, items: { [productId]: { product, qty } } } }
+ */
+const CartContext = createContext(null);
+const keyFor = (uid) => `commercialapp.carts.${uid}`;
+
+function load(uid) {
+  try { return JSON.parse(localStorage.getItem(keyFor(uid))) || {}; } catch { return {}; }
+}
+
+const slimProduct = ({ id, name, reference, price, image, uom, stock, category }) =>
+  ({ id, name, reference, price, image, uom, stock, category });
+
+export function CartProvider({ children }) {
+  const { user } = useAuth();
+  const uid = user?.uid;
+  const [store, setStore] = useState(() => ({ uid, carts: uid ? load(uid) : {} }));
+  const [lastClientId, setLastClientId] = useState(null);
+
+  // Chargement synchrone quand l'utilisateur change (évite un panier vide au rechargement de page)
+  if (store.uid !== uid) setStore({ uid, carts: uid ? load(uid) : {} });
+  const carts = store.uid === uid ? store.carts : {};
+  const setCarts = (fn) => setStore((s) => ({ ...s, carts: fn(s.carts) }));
+
+  useEffect(() => {
+    if (!uid || store.uid !== uid) return;
+    try { localStorage.setItem(keyFor(uid), JSON.stringify(carts)); } catch { /* stockage plein : on ignore */ }
+  }, [carts, uid]);
+
+  const value = useMemo(() => {
+    const update = (client, fn) => setCarts((all) => {
+      const cart = all[client.id] || { client, items: {} };
+      const items = fn({ ...cart.items });
+      const next = { ...all };
+      if (Object.keys(items).length) next[client.id] = { client: { id: client.id, name: client.name, city: client.city }, items };
+      else delete next[client.id];
+      return next;
+    });
+
+    return {
+      carts,
+      lastClientId,
+      setLastClientId,
+      getItems: (clientId) => Object.values(carts[clientId]?.items || {}),
+      count: (clientId) => Object.values(carts[clientId]?.items || {}).reduce((s, i) => s + i.qty, 0),
+      add: (client, product, qty = 1) => update(client, (items) => {
+        const cur = items[product.id];
+        items[product.id] = { product: slimProduct(product), qty: (cur?.qty || 0) + qty };
+        return items;
+      }),
+      setQty: (client, productId, qty) => update(client, (items) => {
+        if (qty <= 0) delete items[productId];
+        else if (items[productId]) items[productId] = { ...items[productId], qty };
+        return items;
+      }),
+      remove: (client, productId) => update(client, (items) => { delete items[productId]; return items; }),
+      clear: (clientId) => setCarts((all) => { const next = { ...all }; delete next[clientId]; return next; }),
+    };
+  }, [carts, lastClientId]);
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+export const useCart = () => useContext(CartContext);
+</file>
+
+<file path="frontend/src/context/ToastContext.jsx">
+import { createContext, useCallback, useContext, useState } from 'react';
+import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+
+const ToastContext = createContext(null);
+let nextId = 0;
+
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+  const dismiss = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), []);
+  const toast = useCallback((message, type = 'success') => {
+    const id = ++nextId;
+    setToasts((t) => [...t.slice(-1), { id, message, type }]);
+    setTimeout(() => dismiss(id), 2800);
+  }, [dismiss]);
+
+  return (
+    <ToastContext.Provider value={toast}>
+      {children}
+      <div className="toasts" role="status" aria-live="polite">
+        {toasts.map((t) => (
+          <div key={t.id} className={`toast toast--${t.type}`}>
+            {t.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            <span>{t.message}</span>
+            <button className="toast__close" onClick={() => dismiss(t.id)} aria-label="Fermer"><X size={16} /></button>
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export const useToast = () => useContext(ToastContext);
+</file>
+
+<file path="frontend/src/lib/api.js">
+const BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const TOKEN_KEY = 'commercialapp.token';
+
+export const tokenStore = {
+  get: () => localStorage.getItem(TOKEN_KEY),
+  set: (t) => localStorage.setItem(TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(TOKEN_KEY),
+};
+
+let onUnauthorized = () => {};
+export const setUnauthorizedHandler = (fn) => { onUnauthorized = fn; };
+
+export class ApiError extends Error {
+  constructor(message, status) { super(message); this.status = status; }
+}
+
+async function request(path, { method = 'GET', body } = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = tokenStore.get();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let res;
+  try {
+    res = await fetch(`${BASE}/api${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  } catch {
+    throw new ApiError('Serveur injoignable. Vérifiez que le backend est démarré.', 0);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 401 && path !== '/auth/login') onUnauthorized();
+    throw new ApiError(data.error || `Erreur ${res.status}`, res.status);
+  }
+  return data;
+}
+
+export const api = {
+  login: (login, password) => request('/auth/login', { method: 'POST', body: { login, password } }),
+  me: () => request('/auth/me'),
+  clients: () => request('/clients'),
+  client: (id) => request(`/clients/${id}`),
+  products: (clientId) => request(`/clients/${clientId}/products`),
+  product: (clientId, productId) => request(`/clients/${clientId}/products/${productId}`),
+  quote: (clientId, lines) => request(`/clients/${clientId}/quote`, { method: 'POST', body: { lines } }),
+  stats: () => request('/orders/stats'),
+  orders: () => request('/orders'),
+  order: (id) => request(`/orders/${id}`),
+  createOrder: (clientId, lines) => request('/orders', { method: 'POST', body: { clientId, lines } }),
+};
+</file>
+
+<file path="frontend/src/lib/format.js">
+export const VAT_RATE = 0.2; // TVA fixée à 20 %
+
+const money = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const formatDH = (n) => `${money.format(Number(n) || 0)} DH`;
+
+export const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+
+export function computeTotals(lines) {
+  const totalHT = round2(lines.reduce((s, l) => s + l.unitPrice * l.qty, 0));
+  const vat = round2(totalHT * VAT_RATE);
+  return { totalHT, vat, totalTTC: round2(totalHT + vat) };
+}
+
+export function initials(name = '') {
+  const words = name.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return '?';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+/** Odoo renvoie les dates en UTC au format "YYYY-MM-DD HH:MM:SS". */
+export function formatDate(value, withTime = true) {
+  if (!value) return '—';
+  const d = new Date(String(value).replace(' ', 'T') + (String(value).includes('Z') ? '' : 'Z'));
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString('fr-FR', withTime
+    ? { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+    : { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+export const normalize = (s = '') => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+</file>
+
+<file path="frontend/src/lib/useAsync.js">
+import { useCallback, useEffect, useState } from 'react';
+
+/** Charge des données et expose { data, loading, error, reload }. */
+export function useAsync(fn, deps = []) {
+  const [state, setState] = useState({ data: null, loading: true, error: null });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const run = useCallback(fn, deps);
+  const load = useCallback(() => {
+    let cancelled = false;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    run()
+      .then((data) => !cancelled && setState({ data, loading: false, error: null }))
+      .catch((e) => !cancelled && setState({ data: null, loading: false, error: e.message }));
+    return () => { cancelled = true; };
+  }, [run]);
+  useEffect(() => load(), [load]);
+  return { ...state, reload: load };
+}
+</file>
+
+<file path="frontend/src/lib/usePricedLines.js">
+import { useEffect, useMemo, useState } from 'react';
+import { api } from './api';
+import { computeTotals } from './format';
+
+/**
+ * Lignes du panier avec prix unitaires recalculés par le backend
+ * (les listes de prix Odoo peuvent dépendre de la quantité).
+ */
+export function usePricedLines(clientId, items) {
+  const [prices, setPrices] = useState({});
+  const [pricing, setPricing] = useState(false);
+  const signature = items.map((i) => `${i.product.id}:${i.qty}`).join(',');
+
+  useEffect(() => {
+    if (!clientId || !items.length) { setPrices({}); return undefined; }
+    let cancelled = false;
+    setPricing(true);
+    const t = setTimeout(() => {
+      api.quote(clientId, items.map((i) => ({ productId: i.product.id, qty: i.qty })))
+        .then((d) => { if (!cancelled) setPrices(Object.fromEntries(d.lines.map((l) => [l.productId, l.unitPrice]))); })
+        .catch(() => {})
+        .finally(() => { if (!cancelled) setPricing(false); });
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, signature]);
+
+  return useMemo(() => {
+    const lines = items.map((i) => {
+      const unitPrice = prices[i.product.id] ?? i.product.price;
+      return { ...i, unitPrice, subtotal: unitPrice * i.qty };
+    });
+    return { lines, totals: computeTotals(lines), pricing };
+  }, [items, prices, pricing]);
+}
+</file>
+
+<file path="frontend/src/pages/ClientProducts.jsx">
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, MapPin, SearchX, ShoppingCart, Tag } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH, normalize } from '../lib/format';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
+import { usePricedLines } from '../lib/usePricedLines';
+import { SearchInput, Skeleton, ErrorState, EmptyState, Avatar, Modal } from '../components/ui';
+import ProductTable from '../components/ProductTable';
+import ProductCard from '../components/ProductCard';
+import Cart from '../components/Cart';
+
+export default function ClientProducts() {
+  const { clientId } = useParams();
+  const id = Number(clientId);
+  const cart = useCart();
+  const toast = useToast();
+  const [q, setQ] = useState('');
+  const [category, setCategory] = useState('');
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const data = useAsync(() => Promise.all([api.client(id), api.products(id)])
+    .then(([c, p]) => ({ client: c.client, products: p.products, pricelist: p.pricelist })), [id]);
+
+  useEffect(() => { cart.setLastClientId(id); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const categories = useMemo(
+    () => [...new Set((data.data?.products || []).map((p) => p.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [data.data],
+  );
+  const shown = useMemo(() => {
+    const n = normalize(q);
+    return (data.data?.products || []).filter((p) =>
+      (!category || p.category === category) && (!n || normalize(`${p.name} ${p.reference}`).includes(n)));
+  }, [data.data, q, category]);
+
+  const client = data.data?.client;
+  const items = client ? cart.getItems(id) : [];
+  const { totals } = usePricedLines(id, items);
+  const qtyOf = (pid) => items.find((i) => i.product.id === pid)?.qty || 0;
+  const add = (p) => { cart.add(client, p, 1); toast(`${p.name} ajouté au panier`); };
+  const count = items.reduce((s, i) => s + i.qty, 0);
+
+  return (
+    <>
+      <Link to="/clients" className="back-link"><ArrowLeft size={16} /> Mes clients</Link>
+      {data.loading && <Skeleton rows={6} height={60} />}
+      {data.error && <ErrorState message={data.error} onRetry={data.reload} />}
+      {client && (
+        <div className="with-cart">
+          <div className="with-cart__main">
+            <div className="client-hero">
+              <Avatar name={client.name} size={52} />
+              <div>
+                <h1>{client.name}</h1>
+                <p><MapPin size={14} /> {client.city || 'Ville non renseignée'}
+                  {data.data.pricelist && <><span className="sep" /><Tag size={14} /> {data.data.pricelist}</>}
+                </p>
+              </div>
+            </div>
+
+            <section className="panel">
+              <div className="panel__head">
+                <h2>Produits disponibles</h2>
+                <div className="filters">
+                  <SearchInput value={q} onChange={setQ} placeholder="Rechercher un produit…" className="panel__search" />
+                  <select className="select" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Catégorie">
+                    <option value="">Toutes les catégories</option>
+                    {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              {shown.length ? (
+                <>
+                  <div className="only-desktop"><ProductTable products={shown} clientId={id} inCart={qtyOf} onAdd={add} /></div>
+                  <div className="only-mobile product-list">
+                    {shown.map((p) => <ProductCard key={p.id} product={p} clientId={id} qty={qtyOf(p.id)} onAdd={add} />)}
+                  </div>
+                </>
+              ) : (
+                <EmptyState icon={SearchX} title="Aucun produit trouvé" text="Modifiez la recherche ou choisissez une autre catégorie." />
+              )}
+            </section>
+          </div>
+
+          <aside className="with-cart__side"><Cart client={client} /></aside>
+
+          {count > 0 && (
+            <button className="cart-bar" onClick={() => setCartOpen(true)}>
+              <span><ShoppingCart size={18} /> {count} article{count > 1 ? 's' : ''}</span>
+              <strong>{formatDH(totals.totalTTC)} TTC</strong>
+            </button>
+          )}
+          <Modal open={cartOpen} onClose={() => setCartOpen(false)} title="Panier" variant="sheet">
+            <Cart client={client} onNavigate={() => setCartOpen(false)} />
+          </Modal>
+        </div>
+      )}
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Clients.jsx">
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SearchX } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { normalize } from '../lib/format';
+import { useCart } from '../context/CartContext';
+import { SearchInput, Skeleton, ErrorState, EmptyState } from '../components/ui';
+import ClientCard from '../components/ClientCard';
+import PageHeader from '../components/PageHeader';
+
+export default function Clients() {
+  const cart = useCart();
+  const [params, setParams] = useSearchParams();
+  const q = params.get('q') || '';
+  const clients = useAsync(() => api.clients().then((d) => d.clients), []);
+
+  const shown = useMemo(() => {
+    const n = normalize(q);
+    const list = clients.data || [];
+    return n ? list.filter((c) => normalize(`${c.name} ${c.city}`).includes(n)) : list;
+  }, [clients.data, q]);
+
+  return (
+    <>
+      <PageHeader
+        title="Mes clients"
+        subtitle={clients.data ? `${clients.data.length} client${clients.data.length > 1 ? 's' : ''}` : 'Choisissez un client pour préparer sa commande.'}
+      />
+      <section className="panel">
+        <div className="panel__head">
+          <SearchInput value={q} onChange={(v) => setParams(v ? { q: v } : {}, { replace: true })} placeholder="Rechercher un client ou une ville…" className="panel__search panel__search--wide" />
+        </div>
+        {clients.loading && <Skeleton rows={8} height={104} />}
+        {clients.error && <ErrorState message={clients.error} onRetry={clients.reload} />}
+        {clients.data && (shown.length ? (
+          <div className="client-grid">{shown.map((c) => <ClientCard key={c.id} client={c} cartCount={cart.count(c.id)} />)}</div>
+        ) : (
+          <EmptyState icon={SearchX} title="Aucun client trouvé" text={q ? `Aucun résultat pour « ${q} ».` : 'Aucun client disponible.'} />
+        ))}
+      </section>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Confirmation.jsx">
+import { useState } from 'react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Check, Pencil, MapPin, AlertCircle } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH } from '../lib/format';
+import { useCart } from '../context/CartContext';
+import { usePricedLines } from '../lib/usePricedLines';
+import { Button, Skeleton, ErrorState, Avatar, ProductThumb } from '../components/ui';
+import OrderSummary from '../components/OrderSummary';
+import PageHeader from '../components/PageHeader';
+
+export default function Confirmation() {
+  const { clientId } = useParams();
+  const id = Number(clientId);
+  const cart = useCart();
+  const navigate = useNavigate();
+  const items = cart.getItems(id);
+  const { lines, totals, pricing } = usePricedLines(id, items);
+  const client = useAsync(() => api.client(id).then((d) => d.client), [id]);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!items.length && !sending) return <Navigate to={`/clients/${id}`} replace />;
+
+  const confirm = async () => {
+    setError('');
+    setSending(true);
+    try {
+      const res = await api.createOrder(id, items.map((i) => ({ productId: i.product.id, qty: i.qty })));
+      cart.clear(id);
+      navigate(`/commandes/${res.order.id}/confirmee`, { replace: true, state: res });
+    } catch (e) {
+      setError(e.message);
+      setSending(false);
+    }
+  };
+
+  return (
+    <>
+      <Link to={`/clients/${id}`} className="back-link"><ArrowLeft size={16} /> Retour aux produits</Link>
+      <PageHeader title="Confirmation de commande" subtitle="Vérifiez votre commande avant de la confirmer." />
+      <div className="confirm">
+        <section className="panel confirm__lines">
+          <div className="table-wrap">
+            <table className="table">
+              <thead><tr><th>Produit</th><th className="num">Qté</th><th className="num">Prix unitaire</th><th className="num">Sous-total</th></tr></thead>
+              <tbody>
+                {lines.map((l) => (
+                  <tr key={l.product.id}>
+                    <td><span className="product-cell"><ProductThumb product={l.product} size={36} /><span>{l.product.name}<small className="muted">{l.product.reference}</small></span></span></td>
+                    <td className="num">{l.qty}</td>
+                    <td className="num">{formatDH(l.unitPrice)}</td>
+                    <td className="num strong">{formatDH(l.subtotal)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside className="panel confirm__side">
+          {client.loading ? <Skeleton rows={1} height={56} /> : client.error ? <ErrorState message={client.error} /> : (
+            <div className="confirm__client">
+              <Avatar name={client.data.name} size={46} />
+              <div>
+                <span className="muted small">Client</span>
+                <strong>{client.data.name}</strong>
+                <span className="muted small"><MapPin size={12} /> {client.data.city || '—'}</span>
+              </div>
+            </div>
+          )}
+          <OrderSummary totals={totals} pricing={pricing} />
+          {error && <div className="alert alert--error" role="alert"><AlertCircle size={17} />{error}</div>}
+          <div className="confirm__actions">
+            <Button variant="secondary" icon={Pencil} onClick={() => navigate(`/clients/${id}`)} disabled={sending}>Modifier la commande</Button>
+            <Button icon={Check} onClick={confirm} loading={sending} disabled={pricing}>Confirmer la commande</Button>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Dashboard.jsx">
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ClipboardList, Wallet, Users, Clock, ArrowRight, SearchX } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH, normalize } from '../lib/format';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { SearchInput, Skeleton, ErrorState, EmptyState } from '../components/ui';
+import ClientCard from '../components/ClientCard';
+
+function StatCard({ icon: Icon, label, value, tone, hint }) {
+  return (
+    <div className="stat">
+      <span className={`stat__icon stat__icon--${tone}`}><Icon size={20} /></span>
+      <div>
+        <span className="stat__label">{label}</span>
+        <strong className="stat__value">{value}</strong>
+        {hint && <span className="stat__hint">{hint}</span>}
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const { user } = useAuth();
+  const cart = useCart();
+  const stats = useAsync(() => api.stats(), []);
+  const clients = useAsync(() => api.clients().then((d) => d.clients), []);
+  const [q, setQ] = useState('');
+  const firstName = (user?.name || '').split(' ')[0];
+
+  const shown = useMemo(() => {
+    const list = clients.data || [];
+    const n = normalize(q);
+    return (n ? list.filter((c) => normalize(`${c.name} ${c.city}`).includes(n)) : list).slice(0, 12);
+  }, [clients.data, q]);
+
+  return (
+    <>
+      <div className="page-header">
+        <div>
+          <h1>Bonjour {firstName} !</h1>
+          <p>Voici un aperçu de votre activité.</p>
+        </div>
+      </div>
+
+      {stats.error ? null : (
+        <div className="stats">
+          {stats.loading ? Array.from({ length: 4 }, (_, i) => <div key={i} className="skeleton" style={{ height: 92 }} />) : (
+            <>
+              <StatCard icon={ClipboardList} tone="orange" label="Total commandes" value={stats.data.totalOrders} />
+              <StatCard icon={Wallet} tone="blue" label="Chiffre d'affaires" value={formatDH(stats.data.revenue)} hint="Commandes confirmées, TTC" />
+              <StatCard icon={Users} tone="green" label="Clients actifs" value={stats.data.activeClients} hint="Avec au moins une commande" />
+              <StatCard icon={Clock} tone="amber" label="En attente" value={stats.data.pendingOrders} hint="Devis non confirmés" />
+            </>
+          )}
+        </div>
+      )}
+
+      <section className="panel">
+        <div className="panel__head">
+          <h2>Vos clients</h2>
+          <SearchInput value={q} onChange={setQ} placeholder="Rechercher un client…" className="panel__search" />
+          <Link to="/clients" className="link">Voir tous les clients <ArrowRight size={15} /></Link>
+        </div>
+        {clients.loading && <Skeleton rows={4} height={104} />}
+        {clients.error && <ErrorState message={clients.error} onRetry={clients.reload} />}
+        {clients.data && (shown.length ? (
+          <div className="client-grid">
+            {shown.map((c) => <ClientCard key={c.id} client={c} cartCount={cart.count(c.id)} />)}
+          </div>
+        ) : (
+          <EmptyState icon={SearchX} title="Aucun client trouvé" text={q ? `Aucun résultat pour « ${q} ».` : 'Aucun client n’est encore rattaché à votre compte dans Odoo.'} />
+        ))}
+      </section>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Login.jsx">
+import { useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, ShieldCheck, MousePointerClick, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Button, Input, Logo } from '../components/ui';
+import LoginIllustration from '../components/LoginIllustration';
+
+const PERKS = [
+  { icon: Zap, title: 'Rapide', text: 'Commande en quelques clics' },
+  { icon: ShieldCheck, title: 'Sécurisé', text: 'Vos identifiants Odoo' },
+  { icon: MousePointerClick, title: 'Simple', text: 'Une interface claire' },
+];
+
+export default function Login() {
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [form, setForm] = useState({ login: '', password: '' });
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  if (user) return <Navigate to="/" replace />;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await login(form.login, form.password);
+      navigate(location.state?.from || '/', { replace: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login">
+      <aside className="login__brand">
+        <Logo light />
+        <div className="login__pitch">
+          <h1>Votre espace commercial</h1>
+          <p>Commandez facilement, gérez vos clients et accédez à vos tarifs personnalisés.</p>
+        </div>
+        <LoginIllustration />
+        <ul className="login__perks">
+          {PERKS.map(({ icon: Icon, title, text }) => (
+            <li key={title}><Icon size={20} /><strong>{title}</strong><span>{text}</span></li>
+          ))}
+        </ul>
+      </aside>
+
+      <section className="login__form-side">
+        <form className="login__card" onSubmit={submit} noValidate>
+          <div className="login__mobile-logo"><Logo /></div>
+          <h2>Connexion</h2>
+          <p className="muted">Connectez-vous avec vos identifiants</p>
+
+          {error && <div className="alert alert--error" role="alert"><AlertCircle size={17} />{error}</div>}
+
+          <Input
+            id="login" label="Email / identifiant" icon={Mail} autoComplete="username" autoFocus
+            value={form.login} onChange={(e) => setForm({ ...form, login: e.target.value })} placeholder="prenom.nom@entreprise.ma"
+          />
+          <Input
+            id="password" label="Mot de passe" icon={Lock} type={show ? 'text' : 'password'} autoComplete="current-password"
+            value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Votre mot de passe"
+            right={(
+              <button type="button" className="field__toggle" onClick={() => setShow((s) => !s)} aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
+                {show ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            )}
+          />
+
+          <Button type="submit" size="lg" className="btn--block" loading={loading} iconRight={ArrowRight} disabled={!form.login || !form.password}>
+            Se connecter
+          </Button>
+          <p className="login__foot">Accès réservé aux commerciaux autorisés</p>
+        </form>
+      </section>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/NotFound.jsx">
+import { Link } from 'react-router-dom';
+import { Compass } from 'lucide-react';
+import { Button, EmptyState } from '../components/ui';
+
+export default function NotFound() {
+  return <section className="panel"><EmptyState icon={Compass} title="Page introuvable" text="Cette adresse ne correspond à aucune page." action={<Button as={Link} to="/">Retour à l’accueil</Button>} /></section>;
+}
+</file>
+
+<file path="frontend/src/pages/Orders.jsx">
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ClipboardList, ExternalLink, SearchX } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH, formatDate, normalize } from '../lib/format';
+import { Button, SearchInput, Skeleton, ErrorState, EmptyState } from '../components/ui';
+import PageHeader from '../components/PageHeader';
+
+const TONES = { draft: 'amber', sent: 'amber', sale: 'green', done: 'navy', cancel: 'red' };
+
+export default function Orders() {
+  const orders = useAsync(() => api.orders().then((d) => d.orders), []);
+  const [q, setQ] = useState('');
+  const shown = useMemo(() => {
+    const n = normalize(q);
+    return (orders.data || []).filter((o) => !n || normalize(`${o.number} ${o.client}`).includes(n));
+  }, [orders.data, q]);
+
+  return (
+    <>
+      <PageHeader title="Commandes" subtitle="Vos commandes enregistrées dans Odoo." />
+      <section className="panel">
+        <div className="panel__head">
+          <SearchInput value={q} onChange={setQ} placeholder="Rechercher un numéro ou un client…" className="panel__search panel__search--wide" />
+        </div>
+        {orders.loading && <Skeleton rows={5} height={52} />}
+        {orders.error && <ErrorState message={orders.error} onRetry={orders.reload} />}
+        {orders.data && !orders.data.length && (
+          <EmptyState icon={ClipboardList} title="Aucune commande pour le moment" text="Vos commandes apparaîtront ici après confirmation."
+            action={<Button as={Link} to="/clients">Préparer une commande</Button>} />
+        )}
+        {orders.data?.length > 0 && (shown.length ? (
+          <div className="table-wrap">
+            <table className="table">
+              <thead><tr><th>Numéro</th><th>Client</th><th>Date</th><th>Statut</th><th className="num">Total TTC</th><th className="num"><span className="sr-only">Odoo</span></th></tr></thead>
+              <tbody>
+                {shown.map((o) => (
+                  <tr key={o.id}>
+                    <td className="strong">{o.number}</td>
+                    <td>{o.client}</td>
+                    <td className="muted">{formatDate(o.date, false)}</td>
+                    <td><span className={`badge badge--${TONES[o.state] || 'navy'}`}>{o.stateLabel}</span></td>
+                    <td className="num strong">{formatDH(o.amountTotal)}</td>
+                    <td className="num"><a className="icon-btn" href={o.odooUrl} target="_blank" rel="noreferrer" title="Ouvrir dans Odoo" aria-label={`Ouvrir ${o.number} dans Odoo`}><ExternalLink size={16} /></a></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <EmptyState icon={SearchX} title="Aucune commande trouvée" text={`Aucun résultat pour « ${q} ».`} />)}
+      </section>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/OrderSuccess.jsx">
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { Check, ExternalLink, Plus } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH, formatDate } from '../lib/format';
+import { Button, Skeleton, ErrorState } from '../components/ui';
+
+export default function OrderSuccess() {
+  const { orderId } = useParams();
+  const { state } = useLocation();
+  // Données renvoyées à la création ; sinon (rechargement de page) relues depuis Odoo
+  const data = useAsync(() => (state?.order ? Promise.resolve(state) : api.order(orderId)), [orderId]);
+
+  if (data.loading) return <Skeleton rows={2} height={160} />;
+  if (data.error) return <ErrorState message={data.error} onRetry={data.reload} />;
+  const { order, totals } = data.data;
+  const ttc = totals?.totalTTC ?? order.amountTotal;
+
+  return (
+    <div className="success">
+      <div className="success__card">
+        <span className="success__check"><Check size={34} strokeWidth={3} /></span>
+        <h1>Commande confirmée !</h1>
+        <p className="muted">Votre commande a été envoyée à Odoo.</p>
+        <dl className="success__facts">
+          <div><dt>Client</dt><dd>{order.client}</dd></div>
+          <div><dt>Numéro de commande</dt><dd>{order.number}</dd></div>
+          <div><dt>Date</dt><dd>{formatDate(order.date)}</dd></div>
+          <div><dt>Statut Odoo</dt><dd>{order.stateLabel}</dd></div>
+          <div className="success__total"><dt>Total TTC</dt><dd>{formatDH(ttc)}</dd></div>
+        </dl>
+        <div className="success__actions">
+          <Button as="a" variant="secondary" href={order.odooUrl} target="_blank" rel="noreferrer" iconRight={ExternalLink}>Voir dans Odoo</Button>
+          <Button as={Link} to="/clients" icon={Plus}>Nouvelle commande</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/ProductDetail.jsx">
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, ShoppingCart, Calculator, Info, Tag, Boxes, Ruler } from 'lucide-react';
+import { api } from '../lib/api';
+import { useAsync } from '../lib/useAsync';
+import { formatDH } from '../lib/format';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
+import { Button, QuantityStepper, Skeleton, ErrorState, ProductThumb } from '../components/ui';
+import StockBadge from '../components/StockBadge';
+
+export default function ProductDetail() {
+  const { clientId, productId } = useParams();
+  const cid = Number(clientId);
+  const cart = useCart();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [qty, setQty] = useState(1);
+  const [unit, setUnit] = useState(null);
+
+  const data = useAsync(() => Promise.all([api.client(cid), api.product(cid, productId)])
+    .then(([c, p]) => ({ client: c.client, ...p })), [cid, productId]);
+
+  // Prix unitaire recalculé selon la quantité (paliers de la liste de prix)
+  useEffect(() => {
+    if (!data.data) return undefined;
+    const t = setTimeout(() => {
+      api.quote(cid, [{ productId: Number(productId), qty }])
+        .then((d) => setUnit(d.lines[0]?.unitPrice ?? null)).catch(() => setUnit(null));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [qty, data.data, cid, productId]);
+
+  if (data.loading) return <Skeleton rows={3} height={140} />;
+  if (data.error) return <ErrorState message={data.error} onRetry={data.reload} />;
+
+  const { client, product: p, rules, pricelist } = data.data;
+  const unitPrice = unit ?? p.price;
+  const add = () => {
+    cart.add(client, { ...p, price: p.price }, qty);
+    toast(`${qty} × ${p.name} ajouté au panier`);
+    navigate(`/clients/${cid}`);
+  };
+
+  return (
+    <>
+      <Link to={`/clients/${cid}`} className="back-link"><ArrowLeft size={16} /> {client.name}</Link>
+      <div className="detail">
+        <div className="detail__main">
+          <section className="panel detail__hero">
+            <ProductThumb product={p} size={132} />
+            <div>
+              <h1>{p.name}</h1>
+              <p className="muted">Référence : {p.reference || '—'}</p>
+              <div className="detail__price">
+                {formatDH(p.price)}
+                {p.price < p.listPrice && <s className="list-price">{formatDH(p.listPrice)}</s>}
+              </div>
+              <p className="detail__stock">En stock : <StockBadge stock={p.stock} /></p>
+              {p.description && <p className="detail__desc">{p.description}</p>}
+            </div>
+          </section>
+          <section className="panel">
+            <h2 className="panel__title">Détails du produit</h2>
+            <ul className="facts">
+              <li><Tag size={16} /> Catégorie : <strong>{p.category || '—'}</strong></li>
+              <li><Ruler size={16} /> Unité : <strong>{p.uom || '—'}</strong></li>
+              <li><Boxes size={16} /> Stock : <strong>{p.stock ?? '—'}{p.stock != null && ' unités'}</strong></li>
+            </ul>
+          </section>
+        </div>
+
+        <aside className="panel detail__side">
+          <h2 className="panel__title"><Calculator size={18} /> Règles de calcul</h2>
+          <ul className="rules">
+            <li><span>Prix public</span><strong>{formatDH(p.listPrice)}</strong></li>
+            {rules.length ? rules.map((r, i) => (
+              <li key={i}>
+                <span>{r.minQuantity > 1 ? `À partir de ${r.minQuantity} unités` : pricelist}<small>{r.scope}{r.validity ? `, ${r.validity}` : ''}</small></span>
+                <strong>{r.label}</strong>
+              </li>
+            )) : <li><span>Liste de prix</span><strong>{pricelist ? `${pricelist} : aucune règle spécifique` : 'Prix public appliqué'}</strong></li>}
+            <li><span>TVA</span><strong>20 %, ajoutée à la confirmation</strong></li>
+          </ul>
+
+          <div className="qty-block">
+            <label>Quantité</label>
+            <QuantityStepper value={qty} onChange={setQty} />
+          </div>
+          <div className="calc">
+            <div><span>Prix unitaire</span><span>{formatDH(unitPrice)}</span></div>
+            <div className="calc__total"><span>Total HT</span><span>{formatDH(unitPrice * qty)}</span></div>
+          </div>
+          <p className="hint"><Info size={15} /> Le prix unitaire est recalculé selon la quantité et les règles de la liste de prix du client.</p>
+          <Button className="btn--block" size="lg" icon={ShoppingCart} onClick={add}>Ajouter au panier</Button>
+        </aside>
+      </div>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/ProductsEntry.jsx">
+import { Link, Navigate } from 'react-router-dom';
+import { Package } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { Button, EmptyState } from '../components/ui';
+import PageHeader from '../components/PageHeader';
+
+/** Les prix dépendent du client : on ouvre le catalogue du dernier client consulté, sinon on invite à en choisir un. */
+export default function ProductsEntry() {
+  const { lastClientId } = useCart();
+  if (lastClientId) return <Navigate to={`/clients/${lastClientId}`} replace />;
+  return (
+    <>
+      <PageHeader title="Produits" subtitle="Les prix affichés dépendent du client sélectionné." />
+      <section className="panel">
+        <EmptyState icon={Package} title="Choisissez d’abord un client" text="Sélectionnez un client pour voir ses produits et ses tarifs."
+          action={<Button as={Link} to="/clients">Voir mes clients</Button>} />
+      </section>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/pages/Settings.jsx">
+import { LogOut, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
+import { Avatar, Button } from '../components/ui';
+import PageHeader from '../components/PageHeader';
+
+export default function Settings() {
+  const { user, logout } = useAuth();
+  const cart = useCart();
+  const toast = useToast();
+  const openCarts = Object.values(cart.carts);
+
+  return (
+    <>
+      <PageHeader title="Paramètres" subtitle="Votre compte et vos paniers en cours." />
+      <div className="settings">
+        <section className="panel">
+          <h2 className="panel__title">Mon compte</h2>
+          <div className="profile">
+            <Avatar name={user.name} size={56} tone="orange" />
+            <div><strong>{user.name}</strong><span className="muted">{user.login}</span><span className="badge badge--navy">Commercial</span></div>
+          </div>
+          <p className="muted small">Votre compte et votre mot de passe sont gérés dans Odoo.</p>
+          <Button variant="secondary" icon={LogOut} onClick={logout}>Déconnexion</Button>
+        </section>
+        <section className="panel">
+          <h2 className="panel__title">Paniers en cours</h2>
+          {openCarts.length ? (
+            <ul className="cart-list">
+              {openCarts.map((c) => (
+                <li key={c.client.id}>
+                  <span><ShoppingCart size={16} /> {c.client.name}<small className="muted">{Object.keys(c.items).length} produit(s)</small></span>
+                  <Button size="sm" variant="ghost" onClick={() => { cart.clear(c.client.id); toast('Panier vidé'); }}>Vider</Button>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="muted">Aucun panier en cours.</p>}
+        </section>
+      </div>
+    </>
+  );
+}
+</file>
+
+<file path="frontend/src/styles/index.css">
+/* ============ Tokens ============ */
+:root {
+  --navy: #0B1F3A;
+  --navy-2: #12294A;
+  --navy-3: #1E3A63;
+  --blue: #2563EB;
+  --blue-soft: #EAF1FF;
+  --orange: #FF7A00;
+  --orange-hover: #E86E00;
+  --orange-soft: #FFF3E8;
+  --bg: #F5F7FB;
+  --white: #FFFFFF;
+  --text: #0F172A;
+  --muted: #64748B;
+  --success: #16A34A;
+  --success-soft: #E9F8EF;
+  --amber: #D97706;
+  --amber-soft: #FEF5E6;
+  --danger: #DC2626;
+  --danger-soft: #FDECEC;
+  --border: #E6EAF2;
+  --border-strong: #D5DBE6;
+
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 16px rgba(11, 31, 58, 0.06), 0 1px 3px rgba(11, 31, 58, 0.05);
+  --shadow-lg: 0 18px 50px rgba(11, 31, 58, 0.18);
+  --sidebar-w: 248px;
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { margin: 0; line-height: 1.25; letter-spacing: -0.01em; }
+h1 { font-size: 24px; font-weight: 800; }
+h2 { font-size: 16px; font-weight: 700; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.strong { font-weight: 700; }
+.mono-num { font-variant-numeric: tabular-nums; }
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+/* ============ Buttons & inputs ============ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid transparent; border-radius: var(--r-md);
+  font-weight: 600; white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn--sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.btn--md { height: 40px; padding: 0 16px; }
+.btn--lg { height: 48px; padding: 0 20px; font-size: 15px; }
+.btn--block { width: 100%; }
+.btn--primary { background: var(--orange); color: #fff; box-shadow: 0 4px 12px rgba(255, 122, 0, 0.22); }
+.btn--primary:hover:not(:disabled) { background: var(--orange-hover); }
+.btn--secondary { background: var(--white); border-color: var(--border-strong); color: var(--text); }
+.btn--secondary:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.btn--soft { background: var(--orange-soft); color: var(--orange-hover); }
+.btn--soft:hover:not(:disabled) { background: #FFE6CC; }
+.btn--ghost { background: transparent; color: var(--muted); }
+.btn--ghost:hover:not(:disabled) { background: var(--bg); color: var(--danger); }
+
+.icon-btn {
+  display: inline-grid; place-items: center; width: 36px; height: 36px;
+  border: 0; border-radius: var(--r-sm); background: transparent; color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover { background: var(--bg); color: var(--text); }
+.icon-btn--sm { width: 28px; height: 28px; }
+.icon-btn--sm:hover { color: var(--danger); background: var(--danger-soft); }
+.icon-btn--dark { color: #9FB0C8; }
+.icon-btn--dark:hover { background: var(--navy-3); color: #fff; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field__label { font-size: 13px; font-weight: 600; }
+.field__control { position: relative; display: flex; align-items: center; }
+.field__icon, .search__icon { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
+.field__toggle { position: absolute; right: 6px; border: 0; background: none; color: var(--muted); padding: 8px; border-radius: 6px; }
+.field__toggle:hover { color: var(--text); }
+.input {
+  width: 100%; height: 44px; padding: 0 14px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder { color: #94A3B8; }
+.input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14); }
+.input--icon { padding-left: 40px; }
+.search { position: relative; display: flex; align-items: center; }
+.search .input { height: 40px; background: var(--bg); border-color: transparent; }
+.search .input:focus { background: var(--white); }
+.select {
+  height: 40px; padding: 0 36px 0 14px; border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  appearance: none; font-weight: 500;
+}
+.select:focus { outline: none; border-color: var(--blue); }
+
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--white); overflow: hidden; }
+.stepper button { display: grid; place-items: center; width: 36px; height: 38px; border: 0; background: transparent; color: var(--text); }
+.stepper button:hover:not(:disabled) { background: var(--bg); color: var(--orange); }
+.stepper button:disabled { color: #CBD5E1; cursor: not-allowed; }
+.stepper input { width: 46px; height: 38px; border: 0; text-align: center; font-weight: 700; -moz-appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper input:focus { outline: none; background: var(--blue-soft); }
+.stepper--sm button { width: 28px; height: 30px; }
+.stepper--sm input { width: 36px; height: 30px; font-size: 13px; }
+
+.badge { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge--orange { background: var(--orange-soft); color: var(--orange-hover); }
+.badge--green { background: var(--success-soft); color: var(--success); }
+.badge--amber { background: var(--amber-soft); color: var(--amber); }
+.badge--red { background: var(--danger-soft); color: var(--danger); }
+.badge--navy { background: #E8EDF5; color: var(--navy); }
+
+.stock { font-weight: 600; font-variant-numeric: tabular-nums; }
+.stock--green { color: var(--text); }
+.stock--amber { color: var(--amber); }
+.stock--red { color: var(--danger); }
+.list-price { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+
+.avatar { display: inline-grid; place-items: center; flex: none; border-radius: 50%; font-weight: 700; letter-spacing: 0.02em; }
+.avatar--blue { background: var(--blue-soft); color: var(--blue); }
+.avatar--orange { background: var(--orange); color: #fff; }
+.avatar--navy { background: #E8EDF5; color: var(--navy); }
+.avatar--green { background: var(--success-soft); color: var(--success); }
+
+.thumb { flex: none; border-radius: var(--r-sm); object-fit: cover; background: var(--bg); border: 1px solid var(--border); }
+.thumb--empty { display: grid; place-items: center; color: #94A3B8; }
+
+.alert { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-md); font-size: 13px; font-weight: 500; }
+.alert svg { flex: none; margin-top: 1px; }
+.alert--error { background: var(--danger-soft); color: #9F1C1C; }
+
+.logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: -0.02em; color: var(--navy); }
+.logo__bg { fill: var(--navy); }
+.logo--light { color: #fff; }
+.logo--light .logo__bg { fill: rgba(255, 255, 255, 0.08); }
+
+/* ============ States ============ */
+.state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 20px; text-align: center; color: var(--muted); }
+.state strong { color: var(--text); font-size: 15px; }
+.state p { max-width: 42ch; }
+.state .btn { margin-top: 8px; }
+.state__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--bg); color: var(--muted); margin-bottom: 4px; }
+.state--error .state__icon { background: var(--danger-soft); color: var(--danger); }
+.state--loading { flex-direction: row; justify-content: center; }
+.skeletons { display: grid; gap: 12px; }
+.skeleton { border-radius: var(--r-lg); background: linear-gradient(90deg, #EDF0F6 25%, #F6F8FB 50%, #EDF0F6 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.boot { display: grid; place-items: center; height: 100%; }
+
+/* ============ Toasts & modal ============ */
+.toasts { position: fixed; right: 20px; bottom: 20px; z-index: 100; display: grid; gap: 10px; }
+.toast {
+  display: flex; align-items: center; gap: 10px; min-width: 260px; max-width: 380px;
+  padding: 12px 12px 12px 14px; border-radius: var(--r-md); background: var(--navy); color: #fff;
+  box-shadow: var(--shadow-lg); font-weight: 500; animation: toast-in 0.25s var(--ease);
+}
+.toast--success svg:first-child { color: #4ADE80; }
+.toast--error { background: #7F1D1D; }
+.toast span { flex: 1; }
+.toast__close { border: 0; background: none; color: #9FB0C8; padding: 4px; border-radius: 6px; display: grid; }
+.toast__close:hover { color: #fff; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+
+.modal { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; }
+.modal__backdrop { position: absolute; inset: 0; background: rgba(11, 31, 58, 0.45); animation: fade 0.2s; }
+.modal__panel { position: relative; width: min(480px, 100%); max-height: 90vh; overflow: auto; background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); animation: pop 0.2s var(--ease); }
+.modal__head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.modal__body { padding: 18px; }
+.modal--sheet { place-items: end center; padding: 0; }
+.modal--sheet .modal__panel { width: 100%; max-height: 85vh; border-radius: 18px 18px 0 0; animation: sheet 0.25s var(--ease); }
+.modal--sheet .cart { padding: 0; border: 0; box-shadow: none; position: static; }
+.modal--sheet .cart__head h2 { display: none; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.97); } }
+@keyframes sheet { from { transform: translateY(40px); opacity: 0; } }
+
+/* ============ App shell ============ */
+.app { display: flex; min-height: 100%; }
+.app__main { flex: 1; min-width: 0; margin-left: var(--sidebar-w); display: flex; flex-direction: column; }
+.page { flex: 1; width: 100%; max-width: 1440px; margin: 0 auto; padding: 28px 32px 48px; }
+
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; z-index: 60; width: var(--sidebar-w);
+  display: flex; flex-direction: column; padding: 22px 16px 16px;
+  background: var(--navy); color: #C7D2E3;
+}
+.sidebar__top { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 26px; }
+.sidebar__close { display: none; color: #9FB0C8; }
+.sidebar__nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 12px; height: 42px; padding: 0 12px; border-radius: var(--r-md); font-weight: 500; transition: background 0.15s, color 0.15s; }
+.nav-item:hover { background: var(--navy-2); color: #fff; }
+.nav-item.is-active { background: var(--orange); color: #fff; font-weight: 600; box-shadow: 0 6px 16px rgba(255, 122, 0, 0.28); }
+.sidebar__user { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 4px; border-top: 1px solid var(--navy-3); }
+.sidebar__user-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sidebar__user-info strong { color: #fff; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar__user-info span { font-size: 12px; color: #8FA1BC; }
+.sidebar-backdrop { display: none; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 16px;
+  height: 68px; padding: 0 32px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar__menu { display: none; }
+.topbar__search { flex: 1; max-width: 420px; }
+.topbar__user { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.topbar__user-info { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.3; }
+.topbar__user-info strong { font-size: 13px; }
+.topbar__user-info span { font-size: 12px; color: var(--muted); }
+
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.page-header p { color: var(--muted); margin-top: 4px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; color: var(--muted); font-weight: 600; font-size: 13px; }
+.back-link:hover { color: var(--blue); }
+.link { display: inline-flex; align-items: center; gap: 6px; color: var(--blue); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.link:hover { text-decoration: underline; }
+
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: 20px; }
+.panel__head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.panel__head h2 { margin-right: auto; }
+.panel__search { width: 280px; }
+.panel__search--wide { width: min(460px, 100%); }
+.panel__title { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.filters { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ============ Dashboard ============ */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat { display: flex; gap: 14px; align-items: flex-start; padding: 18px; background: var(--white); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+.stat__icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 12px; }
+.stat__icon--orange { background: var(--orange-soft); color: var(--orange); }
+.stat__icon--blue { background: var(--blue-soft); color: var(--blue); }
+.stat__icon--green { background: var(--success-soft); color: var(--success); }
+.stat__icon--amber { background: var(--amber-soft); color: var(--amber); }
+.stat__label { display: block; font-size: 13px; color: var(--muted); }
+.stat__value { display: block; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat__hint { display: block; font-size: 12px; color: var(--muted); }
+
+.client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.client-card {
+  display: flex; flex-direction: column; gap: 16px; padding: 16px;
+  border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.client-card:hover { border-color: #BFD0F5; box-shadow: var(--shadow-md); }
+.client-card__head { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.client-card__id { min-width: 0; display: flex; flex-direction: column; }
+.client-card__id strong { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-card__id span { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 12.5px; }
+.client-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.client-card__pl { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-card__cta { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--blue); white-space: nowrap; }
+.client-card:hover .client-card__cta svg { transform: translateX(2px); }
+.client-card__cta svg { transition: transform 0.15s; }
+
+/* ============ Client / products ============ */
+.client-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.client-hero p { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); margin-top: 2px; }
+.sep { width: 4px; height: 4px; border-radius: 50%; background: #CBD5E1; margin: 0 4px; }
+
+.with-cart { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.with-cart__side { position: sticky; top: 92px; }
+
+.table-wrap { overflow-x: auto; margin: 0 -20px; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { padding: 10px 20px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); background: #F8FAFC; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.table td { padding: 12px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tbody tr { transition: background 0.12s; }
+.table tbody tr:hover { background: #FAFBFD; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.product-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.product-cell > span:last-child { display: flex; flex-direction: column; }
+.product-cell small { font-weight: 500; font-size: 12px; }
+a.product-cell:hover { color: var(--blue); }
+
+.panel .only-mobile { display: none; }
+.table--products td:first-child { min-width: 190px; }
+.table--products td:nth-child(3) { white-space: nowrap; }
+.btn__count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 2px; border-radius: 999px; background: var(--orange); color: #fff; font-size: 11px; }
+.product-list { display: grid; gap: 12px; }
+.product-card { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: var(--r-lg); }
+.product-card__head { display: flex; gap: 12px; align-items: center; }
+.product-card__head > div { display: flex; flex-direction: column; min-width: 0; }
+.product-card__head strong { font-size: 14px; }
+.product-card__head .muted { font-size: 12px; }
+.product-card__meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; padding: 10px 12px; background: var(--bg); border-radius: var(--r-md); }
+.product-card__meta dt { font-size: 12px; color: var(--muted); }
+.product-card__meta dd { margin: 0; }
+
+/* Cart */
+.cart { position: relative; background: var(--white); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-md); padding: 20px; }
+.cart__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cart__lines { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 0; max-height: 46vh; overflow-y: auto; }
+.cart-line { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.cart-line:first-child { padding-top: 0; }
+.cart-line__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cart-line__top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.cart-line__top strong { font-size: 13.5px; line-height: 1.35; }
+.cart-line__body > .muted { font-size: 12px; }
+.cart-line__bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.cart .state { padding: 28px 8px; }
+
+.summary { display: grid; gap: 8px; margin-bottom: 16px; font-variant-numeric: tabular-nums; transition: opacity 0.15s; }
+.summary.is-pricing { opacity: 0.6; }
+.summary__row { display: flex; justify-content: space-between; }
+.summary__row--muted { color: var(--muted); }
+.summary__row--total { margin-top: 4px; padding: 14px; border-radius: var(--r-md); background: var(--orange-soft); font-weight: 800; font-size: 17px; }
+.summary__row--total span:last-child { color: var(--orange-hover); }
+.summary--compact .summary__row--total { font-size: 16px; padding: 12px; }
+
+.cart-bar {
+  display: none; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 50;
+  align-items: center; justify-content: space-between; gap: 12px; height: 54px; padding: 0 18px;
+  border: 0; border-radius: var(--r-lg); background: var(--navy); color: #fff; box-shadow: var(--shadow-lg);
+}
+.cart-bar span { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.cart-bar strong { color: #FFB066; font-variant-numeric: tabular-nums; }
+
+/* ============ Product detail ============ */
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.detail__main { display: grid; gap: 20px; }
+.detail__hero { display: flex; gap: 24px; align-items: flex-start; }
+.detail__hero .thumb { border-radius: var(--r-lg); }
+.detail__hero h1 { font-size: 22px; }
+.detail__price { margin: 14px 0 6px; font-size: 28px; font-weight: 800; color: var(--orange); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.detail__price .list-price { font-size: 13px; }
+.detail__stock { color: var(--muted); }
+.detail__desc { margin-top: 12px; max-width: 62ch; color: #334155; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.facts li { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+.facts strong { color: var(--text); font-weight: 600; }
+.detail__side { position: sticky; top: 92px; }
+.rules { list-style: none; margin: 0 0 18px; padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); }
+.rules li { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.rules li:last-child { border-bottom: 0; }
+.rules li > span { display: flex; flex-direction: column; color: var(--muted); }
+.rules small { font-size: 11.5px; }
+.rules strong { text-align: right; font-weight: 600; }
+.qty-block { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.qty-block label { font-weight: 600; }
+.calc { display: grid; gap: 8px; padding: 14px; border-radius: var(--r-md); background: var(--bg); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.calc > div { display: flex; justify-content: space-between; }
+.calc__total { font-weight: 800; font-size: 16px; }
+.calc__total span:last-child { color: var(--orange-hover); }
+.hint { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+.hint svg { flex: none; margin-top: 2px; color: var(--blue); }
+
+/* ============ Confirmation ============ */
+.confirm { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+.confirm__lines { padding-top: 0; padding-bottom: 0; overflow: hidden; }
+.confirm__lines .table th { border-top: 0; }
+.confirm__side { position: sticky; top: 92px; display: grid; gap: 18px; }
+.confirm__client { display: flex; gap: 14px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.confirm__client > div { display: flex; flex-direction: column; }
+.confirm__client strong { font-size: 15px; }
+.confirm__client .small { display: inline-flex; align-items: center; gap: 4px; }
+.confirm__side .summary { margin-bottom: 0; }
+.confirm__actions { display: grid; gap: 10px; }
+.confirm__actions .btn { height: 46px; }
+
+/* ============ Success ============ */
+.success { display: grid; place-items: center; padding: 24px 0; }
+.success__card { width: min(560px, 100%); text-align: center; background: var(--white); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-md); padding: 40px 32px 32px; }
+.success__check {
+  display: inline-grid; place-items: center; width: 76px; height: 76px; margin-bottom: 18px;
+  border-radius: 50%; background: var(--success); color: #fff;
+  box-shadow: 0 0 0 10px var(--success-soft); animation: pop-check 0.45s var(--ease);
+}
+@keyframes pop-check { from { transform: scale(0.6); opacity: 0; } }
+.success__card h1 { font-size: 26px; }
+.success__card > .muted { margin-top: 6px; }
+.success__facts { margin: 26px 0; padding: 0; text-align: left; border: 1px solid var(--border); border-radius: var(--r-md); }
+.success__facts > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.success__facts > div:last-child { border-bottom: 0; }
+.success__facts dt { color: var(--muted); }
+.success__facts dd { margin: 0; font-weight: 600; text-align: right; }
+.success__total { background: var(--orange-soft); }
+.success__total dd { color: var(--orange-hover); font-weight: 800; font-size: 17px; }
+.success__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.success__actions .btn { height: 46px; }
+
+/* ============ Settings ============ */
+.settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.settings .panel > .btn { margin-top: 16px; }
+.profile { display: flex; gap: 16px; align-items: center; margin-bottom: 14px; }
+.profile > div { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.profile strong { font-size: 16px; }
+.cart-list { list-style: none; margin: 0; padding: 0; }
+.cart-list li { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cart-list li:last-child { border-bottom: 0; }
+.cart-list li > span { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.cart-list small { font-weight: 500; margin-left: 6px; }
+
+/* ============ Login ============ */
+.login { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100%; background: var(--white); }
+.login__brand {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 28px;
+  padding: 40px 48px; background: var(--navy); color: #fff;
+}
+.login__brand::after {
+  content: ''; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%;
+  border: 60px solid rgba(255, 122, 0, 0.08); pointer-events: none;
+}
+.login__pitch { margin-top: auto; }
+.login__pitch h1 { font-size: clamp(32px, 3.6vw, 48px); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; max-width: 12ch; }
+.login__pitch p { margin-top: 16px; max-width: 44ch; font-size: 16px; color: #B8C5D9; line-height: 1.6; }
+.login__art { width: 100%; max-width: 520px; height: auto; }
+.login__perks { list-style: none; margin: 0; padding: 22px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; border-top: 1px solid var(--navy-3); }
+.login__perks li { display: flex; flex-direction: column; gap: 2px; }
+.login__perks svg { color: var(--orange); margin-bottom: 6px; }
+.login__perks strong { font-size: 15px; }
+.login__perks span { font-size: 12.5px; color: #8FA1BC; }
+.login__form-side { position: relative; display: grid; place-items: center; padding: 40px 24px; }
+.login__form-side::before { content: ''; position: absolute; right: 0; top: 0; width: 240px; height: 180px; border-bottom-left-radius: 180px; background: var(--orange-soft); }
+.login__card { position: relative; width: min(420px, 100%); display: grid; gap: 18px; }
+.login__card h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+.login__card > .muted { margin-top: -12px; }
+.login__card .btn { margin-top: 6px; }
+.login__foot { text-align: center; font-size: 12.5px; color: var(--muted); padding-top: 14px; border-top: 1px solid var(--border); }
+.login__mobile-logo { display: none; }
+
+/* ============ Responsive ============ */
+@media (max-width: 1440px) {
+  .table--products th:nth-child(3), .table--products td:nth-child(3) { display: none; }
+}
+@media (max-width: 1280px) {
+  .with-cart { grid-template-columns: minmax(0, 1fr) 320px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1100px) {
+  .with-cart, .detail, .confirm { grid-template-columns: 1fr; }
+  .with-cart__side { display: none; }
+  .cart-bar { display: flex; }
+  .with-cart { padding-bottom: 72px; }
+  .detail__side, .confirm__side { position: static; }
+}
+@media (max-width: 900px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { width: 272px; transform: translateX(-100%); transition: transform 0.25s var(--ease); box-shadow: var(--shadow-lg); }
+  .sidebar.is-open { transform: none; }
+  .sidebar__close { display: inline-grid; }
+  .sidebar-backdrop { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(11, 31, 58, 0.45); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+  .topbar { padding: 0 16px; gap: 10px; }
+  .topbar__menu { display: inline-grid; }
+  .topbar__user-info { display: none; }
+  .page { padding: 20px 16px 40px; }
+  .login { grid-template-columns: 1fr; }
+  .login__brand { display: none; }
+  .login__mobile-logo { display: block; margin-bottom: 12px; }
+  .settings { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .only-desktop { display: none; }
+  .panel .only-mobile { display: grid; }
+  .stats { gap: 10px; }
+  .stat { padding: 14px; flex-direction: column; gap: 10px; }
+  .stat__value { font-size: 19px; }
+  .panel { padding: 16px; }
+  .table-wrap { margin: 0 -16px; }
+  .table th, .table td { padding: 10px 16px; }
+  .panel__search, .filters, .filters .select { width: 100%; }
+  .filters .search { flex: 1 1 100%; }
+  .detail__hero { flex-direction: row; gap: 16px; }
+  .detail__hero .thumb { width: 88px !important; height: 88px !important; }
+  .success__card { padding: 32px 18px 20px; }
+  .success__actions { grid-template-columns: 1fr; }
+  h1 { font-size: 21px; }
+  .toasts { left: 12px; right: 12px; bottom: 76px; }
+  .toast { min-width: 0; max-width: none; }
+}
+</file>
+
+<file path="frontend/src/App.jsx">
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import { Spinner } from './components/ui';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Clients from './pages/Clients';
+import ClientProducts from './pages/ClientProducts';
+import ProductDetail from './pages/ProductDetail';
+import Confirmation from './pages/Confirmation';
+import OrderSuccess from './pages/OrderSuccess';
+import Orders from './pages/Orders';
+import ProductsEntry from './pages/ProductsEntry';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+
+function Protected({ children }) {
+  const { user, ready } = useAuth();
+  const location = useLocation();
+  if (!ready) return <div className="boot"><Spinner /></div>;
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  return children;
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route element={<Protected><Layout /></Protected>}>
+        <Route index element={<Dashboard />} />
+        <Route path="clients" element={<Clients />} />
+        <Route path="clients/:clientId" element={<ClientProducts />} />
+        <Route path="clients/:clientId/produits/:productId" element={<ProductDetail />} />
+        <Route path="clients/:clientId/confirmation" element={<Confirmation />} />
+        <Route path="produits" element={<ProductsEntry />} />
+        <Route path="commandes" element={<Orders />} />
+        <Route path="commandes/:orderId/confirmee" element={<OrderSuccess />} />
+        <Route path="parametres" element={<Settings />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  );
+}
+</file>
+
+<file path="frontend/src/main.jsx">
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
+import App from './App';
+import './styles/index.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
+);
+</file>
+
+<file path="frontend/index.html">
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>CommercialApp</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="frontend/package.json">
+{
+  "name": "commercial-order-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}
+</file>
+
+<file path="frontend/vite.config.js">
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [react()],
+    server: {
+      port: 5173,
+      // En dev, /api est redirigé vers le backend (évite les soucis CORS)
+      proxy: { '/api': env.VITE_BACKEND_URL || 'http://localhost:4001' },
+    },
+  };
+});
+</file>
+
+<file path=".gitignore">
+node_modules/
+dist/
+.env
+</file>
+
+<file path="README.md">
+# CommercialApp
+
+Application de prise de commande pour les commerciaux, connectée à Odoo.
+
+Parcours : connexion → clients → produits du client (prix client + stock) → panier → confirmation (TVA 20 %) → commande créée dans Odoo.
+
+- `frontend/` : React + Vite (port 5173)
+- `backend/` : Node.js + Express (port 4001), parle à Odoo en JSON-RPC
+
+Prérequis : Node.js 18 ou plus.
+
+## 1. Installation du backend
+
+```
+cd backend
+npm install
+cp .env.example .env
+```
+
+Puis remplir `backend/.env` (voir section 3).
+
+## 2. Installation du frontend
+
+```
+cd frontend
+npm install
+```
+
+Aucun `.env` n'est nécessaire en développement : Vite redirige `/api` vers `http://localhost:4001`.
+
+## 3. Variables `.env` (backend)
+
+| Variable | Rôle |
+|---|---|
+| `PORT` | Port du backend (4001) |
+| `CORS_ORIGIN` | URL du frontend (http://localhost:5173) |
+| `JWT_SECRET` | Longue chaîne aléatoire pour signer les sessions |
+| `ODOO_URL` | URL de ton Odoo |
+| `ODOO_DB` | Nom de la base Odoo |
+| `ODOO_USERNAME` / `ODOO_PASSWORD` | Compte technique Odoo (mot de passe ou clé API) |
+| `ODOO_CONFIRM_ORDER` | `true` = la commande est confirmée dans Odoo, `false` = reste en devis |
+| `ODOO_TAX_ID` | Optionnel : id de la taxe 20 %. Sinon recherche automatique d'une taxe de vente à 20 % |
+| `CLIENTS_ONLY_MINE` | `true` = chaque commercial ne voit que ses clients (champ Vendeur) |
+| `ORDERS_ONLY_MINE` | `true` = stats et commandes limitées au commercial connecté |
+
+Ne jamais mettre de vrais secrets dans le code ni dans Git : ils restent dans `.env`.
+
+## 4. Lancer le backend
+
+```
+cd backend
+npm run dev
+```
+
+## 5. Lancer le frontend
+
+```
+cd frontend
+npm run dev
+```
+
+Ouvrir http://localhost:5173 et se connecter avec ses identifiants Odoo.
+
+## Tester sans Odoo (optionnel)
+
+Un faux Odoo en mémoire est fourni, uniquement pour les tests :
+
+```
+cd backend
+npm run mock:odoo
+```
+
+Dans `backend/.env` : `ODOO_URL=http://localhost:8069`, `ODOO_DB=demo`, `ODOO_USERNAME=api`, `ODOO_PASSWORD=api`.
+Connexion dans l'app : `salma@demo.ma` / `demo`.
+
+## Fonctionnement
+
+- **Connexion** : vérifiée par Odoo avec les identifiants du commercial, puis session JWT.
+- **Prix client** : calculés depuis la liste de prix Odoo du client (prix fixe, remise %, formule, paliers de quantité). Recalculés côté serveur à la création de la commande.
+- **TVA** : fixée à 20 %. La taxe Odoo à 20 % est appliquée aux lignes de commande.
+- **Commande** : créée dans `sale.order` avec le commercial connecté comme vendeur.
+
+## Production
+
+```
+cd frontend
+npm run build
+```
+
+Le dossier `frontend/dist` est à servir en statique. Si le backend est sur un autre domaine, mettre `VITE_API_URL=https://url-du-backend` dans `frontend/.env` avant le build, et mettre l'URL du frontend dans `CORS_ORIGIN`.
+</file>
+
+</files>
