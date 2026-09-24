@@ -493,3 +493,26 @@ a.product-cell:hover { color: var(--blue); }
   .toasts { left: 12px; right: 12px; bottom: 76px; }
   .toast { min-width: 0; max-width: none; }
 }
+/* Keep the "Ajouter" button always visible */
+.table--products th:last-child,
+.table--products td:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--white);
+  box-shadow: -8px 0 8px -8px rgba(15, 23, 42, 0.12);
+}
+.table--products tbody tr:hover td:last-child { background: #FAFBFD; }
+.table--products th:last-child { background: #F8FAFC; }
+
+/* Tighter columns so everything fits */
+.table--products th,
+.table--products td { padding-left: 12px; padding-right: 12px; }
+.table--products th:first-child,
+.table--products td:first-child { padding-left: 20px; }
+.table--products th:last-child,
+.table--products td:last-child { padding-right: 20px; }
+
+@media (max-width: 1440px) {
+  .table--products th:nth-child(2), .table--products td:nth-child(2),
+  .table--products th:nth-child(3), .table--products td:nth-child(3) { display: none; }
+}
