@@ -63,7 +63,17 @@ backend/
   vercel.json
 frontend/
   public/
+    bg.webp
+    Bon de livraison - Barbery - BL-2026-04459.pdf
+    Bon de livraison - CHAKIB KORTBI - BL-2026-04453.pdf
+    Bon de livraison - Coffeco kenitra - BL-2026-04450.pdf
+    Bon de livraison - HICHAM AIT KASSEM - BL-2026-04464.pdf
+    Bon de livraison - MIMOUN MOHAMEDIA - BL-2026-04469.pdf
+    Bon de livraison - RS VILLA - BL_2026_04797 (1).pdf
+    Bon de livraison - RS VILLA - BL_2026_04797.pdf
+    Bon de livraison - Shake coffee & CO - BL-2026-04449 (1).pdf
     favicon.svg
+    Opérations de transfert - RS VILLA - BL_2026_04797.pdf
     panel_photo_hq.png
   src/
     components/
@@ -2335,12 +2345,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 }
 </file>
 
-<file path="frontend/vercel.json">
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
-</file>
-
 <file path="frontend/vite.config.js">
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -2451,12 +2455,28 @@ npm run build
 Le dossier `frontend/dist` est à servir en statique. Si le backend est sur un autre domaine, mettre `VITE_API_URL=https://url-du-backend` dans `frontend/.env` avant le build, et mettre l'URL du frontend dans `CORS_ORIGIN`.
 </file>
 
+<file path="frontend/vercel.json">
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+</file>
+
+<file path=".gitignore">
+node_modules/
+dist/
+.env
+
+.vercel
+.env*
+</file>
+
 <file path="frontend/src/pages/Login.jsx">
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, ShieldCheck, MousePointerClick, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button, Input, Logo } from '../components/ui';
+import LoginIllustration from '../components/LoginIllustration';
 
 const PERKS = [
   { icon: Zap, title: 'Rapide', text: 'Commande en quelques clics' },
@@ -2497,6 +2517,7 @@ export default function Login() {
           <h1>Votre espace commercial</h1>
           <p>Commandez facilement, gérez vos clients et accédez à vos tarifs personnalisés.</p>
         </div>
+        <LoginIllustration />
         <ul className="login__perks">
           {PERKS.map(({ icon: Icon, title, text }) => (
             <li key={title}><Icon size={20} /><strong>{title}</strong><span>{text}</span></li>
@@ -2959,23 +2980,13 @@ a.product-cell:hover { color: var(--blue); }
 .login { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100%; background: var(--white); }
 .login__brand {
   position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 28px;
-  padding: 40px 48px; color: #fff;
-  background-image: url('C:\Users\Lenovo\Downloads\commercial-order-app_design\frontend\public\panel_photo_hq.png');
-  background-size: cover;
-  background-position: center;
+  padding: 40px 48px; background: var(--navy); color: #fff;
 }
-.login__brand::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(11,31,58,0.35) 0%, rgba(11,31,58,0.55) 45%, rgba(11,31,58,0.9) 100%);
-  pointer-events: none;
-  z-index: 0;
+.login__brand::after {
+  content: ''; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%;
+  border: 60px solid rgba(255, 122, 0, 0.08); pointer-events: none;
 }
-.login__brand > * {
-  position: relative;
-  z-index: 1;
-}
-.login__pitch { margin-top: auto; margin-bottom: 40px; }
+.login__pitch { margin-top: auto; }
 .login__pitch h1 { font-size: clamp(32px, 3.6vw, 48px); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; max-width: 12ch; }
 .login__pitch p { margin-top: 16px; max-width: 44ch; font-size: 16px; color: #B8C5D9; line-height: 1.6; }
 .login__art { width: 100%; max-width: 520px; height: auto; }
@@ -3043,15 +3054,6 @@ a.product-cell:hover { color: var(--blue); }
   .toasts { left: 12px; right: 12px; bottom: 76px; }
   .toast { min-width: 0; max-width: none; }
 }
-</file>
-
-<file path=".gitignore">
-node_modules/
-dist/
-.env
-
-.vercel
-.env*
 </file>
 
 </files>
